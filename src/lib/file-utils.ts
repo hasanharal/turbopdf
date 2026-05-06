@@ -7,7 +7,7 @@ export const formatBytes = (bytes: number) => {
 };
 
 export const downloadBlob = (data: Uint8Array | Blob, filename: string, type = "application/pdf") => {
-  const blob = data instanceof Blob ? data : new Blob([data], { type });
+  const blob = data instanceof Blob ? data : new Blob([data as BlobPart], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
