@@ -11,10 +11,7 @@ const tool = getTool("pdf-to-word")!;
 
 // Build a minimal valid .docx (Word) file containing the extracted plain text.
 const buildDocx = async (text: string): Promise<Uint8Array> => {
-  const { default: JSZip } = await import("jszip" as any).catch(async () => {
-    // Fallback: implement a tiny manual zip if jszip not present
-    throw new Error("zip-fallback");
-  });
+  const JSZip = (await import("jszip")).default;
   const zip = new JSZip();
   zip.file("[Content_Types].xml",
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
