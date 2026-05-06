@@ -1,16 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Hero } from "@/components/sections/Hero";
+import { ToolsGrid } from "@/components/sections/ToolsGrid";
+import { Features } from "@/components/sections/Features";
+import { SeoContent } from "@/components/sections/SeoContent";
+import { FAQ } from "@/components/sections/FAQ";
+import { Seo } from "@/components/Seo";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+export default function Index() {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen flex flex-col">
+      <Seo
+        title="TurboPDF — Fast, Free & Secure PDF Tools Online"
+        description="Compress, merge, split and convert PDFs instantly in your browser. 100% free, secure browser-side processing — no upload required."
+        canonical="https://turbopdf.app/"
+      />
+      <Navbar />
+      <main className="flex-1">
+        <Hero />
+        <ToolsGrid />
+        <Features />
+        <SeoContent />
+        <FAQ />
+      </main>
+      <Footer />
     </div>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}
