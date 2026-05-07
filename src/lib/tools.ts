@@ -1,4 +1,7 @@
-import { FileArchive, FileStack, Scissors, FileText, FileType, Image as ImageIcon } from "lucide-react";
+import {
+  FileArchive, FileStack, Scissors, FileText, FileType, Image as ImageIcon,
+  ScanLine, Unlock, Lock, Droplets, RotateCw, Hash, Trash2, ArrowDownUp, PenTool, BookOpen,
+} from "lucide-react";
 
 export type Tool = {
   slug: string;
@@ -9,6 +12,7 @@ export type Tool = {
   gradient: string;
   accept: string;
   multiple: boolean;
+  category?: "Optimize" | "Organize" | "Convert" | "Edit" | "Security" | "View";
 };
 
 export const tools: Tool[] = [
@@ -21,6 +25,7 @@ export const tools: Tool[] = [
     gradient: "from-indigo-500 to-violet-500",
     accept: "application/pdf",
     multiple: false,
+    category: "Optimize",
   },
   {
     slug: "merge-pdf",
@@ -31,6 +36,7 @@ export const tools: Tool[] = [
     gradient: "from-violet-500 to-fuchsia-500",
     accept: "application/pdf",
     multiple: true,
+    category: "Organize",
   },
   {
     slug: "split-pdf",
@@ -41,6 +47,7 @@ export const tools: Tool[] = [
     gradient: "from-fuchsia-500 to-pink-500",
     accept: "application/pdf",
     multiple: false,
+    category: "Organize",
   },
   {
     slug: "pdf-to-word",
@@ -51,6 +58,7 @@ export const tools: Tool[] = [
     gradient: "from-blue-500 to-indigo-500",
     accept: "application/pdf",
     multiple: false,
+    category: "Convert",
   },
   {
     slug: "word-to-pdf",
@@ -61,6 +69,7 @@ export const tools: Tool[] = [
     gradient: "from-emerald-500 to-teal-500",
     accept: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     multiple: false,
+    category: "Convert",
   },
   {
     slug: "jpg-to-pdf",
@@ -71,7 +80,118 @@ export const tools: Tool[] = [
     gradient: "from-amber-500 to-orange-500",
     accept: "image/jpeg,image/png,image/webp",
     multiple: true,
+    category: "Convert",
+  },
+  {
+    slug: "ocr-pdf",
+    name: "OCR PDF",
+    tagline: "Extract editable text from scanned PDFs",
+    description: "Run optical character recognition on scanned PDFs or images to extract editable text right in your browser.",
+    icon: ScanLine,
+    gradient: "from-cyan-500 to-blue-500",
+    accept: "application/pdf,image/jpeg,image/png",
+    multiple: false,
+    category: "Convert",
+  },
+  {
+    slug: "unlock-pdf",
+    name: "Unlock PDF",
+    tagline: "Remove password from a PDF",
+    description: "Remove password restrictions from PDFs you legally own. Files are processed securely in your browser.",
+    icon: Unlock,
+    gradient: "from-lime-500 to-emerald-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Security",
+  },
+  {
+    slug: "protect-pdf",
+    name: "Protect PDF",
+    tagline: "Add password protection to a PDF",
+    description: "Encrypt your PDF with a password to control who can open and view your document.",
+    icon: Lock,
+    gradient: "from-red-500 to-rose-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Security",
+  },
+  {
+    slug: "watermark-pdf",
+    name: "Watermark PDF",
+    tagline: "Add a custom text watermark",
+    description: "Stamp every page of your PDF with a customizable text watermark — opacity, position and rotation included.",
+    icon: Droplets,
+    gradient: "from-sky-500 to-cyan-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Edit",
+  },
+  {
+    slug: "rotate-pdf",
+    name: "Rotate PDF",
+    tagline: "Rotate pages 90°, 180° or 270°",
+    description: "Rotate every page or selected pages of your PDF and save the result instantly.",
+    icon: RotateCw,
+    gradient: "from-orange-500 to-red-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Edit",
+  },
+  {
+    slug: "page-numbers",
+    name: "Page Numbers",
+    tagline: "Add page numbering to a PDF",
+    description: "Automatically add clean, customizable page numbers to your PDF documents.",
+    icon: Hash,
+    gradient: "from-purple-500 to-indigo-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Edit",
+  },
+  {
+    slug: "delete-pages",
+    name: "Delete Pages",
+    tagline: "Remove pages from a PDF",
+    description: "Quickly delete unwanted pages from your PDF with a visual page picker.",
+    icon: Trash2,
+    gradient: "from-rose-500 to-red-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Organize",
+  },
+  {
+    slug: "reorder-pages",
+    name: "Reorder Pages",
+    tagline: "Drag and drop to reorder pages",
+    description: "Rearrange the pages of your PDF with smooth drag-and-drop and download the reordered file.",
+    icon: ArrowDownUp,
+    gradient: "from-teal-500 to-emerald-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Organize",
+  },
+  {
+    slug: "sign-pdf",
+    name: "Sign PDF",
+    tagline: "Add your signature to a PDF",
+    description: "Draw or upload your signature and place it on any page of your PDF, all in your browser.",
+    icon: PenTool,
+    gradient: "from-pink-500 to-rose-500",
+    accept: "application/pdf",
+    multiple: false,
+    category: "Edit",
+  },
+  {
+    slug: "pdf-reader",
+    name: "PDF Reader",
+    tagline: "Preview PDFs with zoom controls",
+    description: "Open and read PDFs directly in your browser with smooth, fast rendering and zoom controls.",
+    icon: BookOpen,
+    gradient: "from-slate-500 to-gray-700",
+    accept: "application/pdf",
+    multiple: false,
+    category: "View",
   },
 ];
 
-export const getTool = (slug: string) => tools.find((t) => t.slug === slug);
+export const getTool = (slug: string) => tools.find((t) => t.slug === slug)!;
