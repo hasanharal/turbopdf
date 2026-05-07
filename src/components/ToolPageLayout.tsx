@@ -1,45 +1,68 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download } from "lucide-react";
-import { useState, ReactNode } from "react";
+import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download, ShieldCheck } from "lucide-react";
+import { useState, ReactNode, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Dropzone } from "@/components/Dropzone";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Seo } from "@/components/Seo";
 import { Tool } from "@/lib/tools";
-import { ShieldCheck } from "lucide-react";
 
 type State = "idle" | "processing" | "success" | "error";
 
-type Props = {
-  tool: Tool;
-  process: (files: File[]) => Promise<void>;
-  helper?: ReactNode;
+export type ProcessCtx = {
+  setProgress: (n: number) => void;
+  setStatus: (s: string) => void;
 };
 
-export const ToolPageLayout = ({ tool, process, helper }: Props) => {
+type Props = {
+  tool: Tool;
+  process: (files: File[], ctx: ProcessCtx) => Promise<ReactNode | void>;
+  /** Slot rendered above the action button — for tool-specific options */
+  options?: (files: File[]) => ReactNode;
+  helper?: ReactNode;
+  ctaLabel?: string;
+  hideDefaultDropzone?: boolean;
+  customBody?: ReactNode;
+};
+
+export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideDefaultDropzone, customBody }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState("");
+  const [result, setResult] = useState<ReactNode>(null);
   const Icon = tool.icon;
 
-  const run = async () => {
-    if (!files.length) return;
+  const run = useCallback(async () => {
+    if (!files.length && !hideDefaultDropzone) return;
     setState("processing");
     setError("");
+    setProgress(0);
+    setStatus("Preparing…");
+    setResult(null);
     try {
-      await process(files);
+      const r = await process(files, { setProgress, setStatus });
+      setProgress(100);
+      setStatus("Done");
+      if (r) setResult(r);
       setState("success");
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || "Something went wrong. Please try a different file.");
       setState("error");
     }
-  };
+  }, [files, hideDefaultDropzone, process]);
 
   const reset = () => {
     setFiles([]);
     setState("idle");
     setError("");
+    setProgress(0);
+    setStatus("");
+    setResult(null);
   };
 
   return (
@@ -47,16 +70,14 @@ export const ToolPageLayout = ({ tool, process, helper }: Props) => {
       <Seo
         title={`${tool.name} — Free Online ${tool.name} Tool | TurboPDF`}
         description={tool.description}
+        canonical={`https://turbopdf.app/${tool.slug}`}
       />
       <Navbar />
       <main className="flex-1">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-glow pointer-events-none" />
           <div className="container-tight relative pt-10 pb-6">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-            >
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
               <ChevronLeft className="h-4 w-4" /> Back to all tools
             </Link>
             <div className="flex items-start gap-4 max-w-3xl">
@@ -74,14 +95,24 @@ export const ToolPageLayout = ({ tool, process, helper }: Props) => {
         <section className="py-10">
           <div className="container-tight max-w-3xl">
             <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-soft">
-              <Dropzone
-                accept={tool.accept}
-                multiple={tool.multiple}
-                files={files}
-                onFiles={setFiles}
-              />
+              {!hideDefaultDropzone && (
+                <Dropzone accept={tool.accept} multiple={tool.multiple} files={files} onFiles={setFiles} />
+              )}
 
+              {customBody}
+
+              {options && files.length > 0 && state !== "success" && <div className="mt-6">{options(files)}</div>}
               {helper && <div className="mt-5">{helper}</div>}
+
+              {state === "processing" && (
+                <div className="mt-6 space-y-2 animate-fade-in">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{status || "Processing…"}</span>
+                    <span>{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+              )}
 
               {state === "error" && (
                 <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 animate-fade-in">
@@ -91,9 +122,12 @@ export const ToolPageLayout = ({ tool, process, helper }: Props) => {
               )}
 
               {state === "success" && (
-                <div className="mt-5 flex items-center gap-3 p-4 rounded-xl bg-success/10 text-success-foreground border border-success/20 animate-fade-in">
-                  <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-                  <p className="text-sm font-medium text-foreground">Done! Your file has been downloaded.</p>
+                <div className="mt-5 animate-fade-in space-y-4">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
+                    <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+                    <p className="text-sm font-medium text-foreground">Done! Your file has been downloaded.</p>
+                  </div>
+                  {result}
                 </div>
               )}
 
@@ -102,13 +136,13 @@ export const ToolPageLayout = ({ tool, process, helper }: Props) => {
                   <Button
                     size="lg"
                     onClick={run}
-                    disabled={!files.length || state === "processing"}
+                    disabled={(!files.length && !hideDefaultDropzone) || state === "processing"}
                     className="bg-hero-gradient hover:opacity-90 shadow-soft h-12 px-6 font-semibold"
                   >
                     {state === "processing" ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</>
                     ) : (
-                      <><Download className="mr-2 h-4 w-4" /> Process & Download</>
+                      <><Download className="mr-2 h-4 w-4" /> {ctaLabel || "Process & Download"}</>
                     )}
                   </Button>
                 ) : (
