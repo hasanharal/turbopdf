@@ -18,13 +18,12 @@ export default function ProtectPdf() {
     if (password.length < 4) throw new Error("Password must be at least 4 characters.");
     if (password !== confirm) throw new Error("Passwords do not match.");
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const doc = await CantooPDFDocument.load(bytes, { ignoreEncryption: true });
-    (doc as any).encrypt({
+    const doc = await CantooPDFDocument.load(bytes);
+    const data = await (doc as any).save({
       userPassword: password,
-      ownerPassword: `${password}-owner`,
-      permissions: { printing: "highResolution" as const, copying: false, modifying: false },
+      ownerPassword: password,
+      permissions: { printing: "highResolution" as const },
     });
-    const data = await doc.save({ useObjectStreams: true });
     downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-protected.pdf");
   };
 

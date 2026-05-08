@@ -16,7 +16,7 @@ export const ToolsGrid = () => (
         </p>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {tools.map((tool, i) => {
           const Icon = tool.icon;
           return (
@@ -29,15 +29,15 @@ export const ToolsGrid = () => (
             >
               <Link
                 to={`/${tool.slug}`}
-                className="group relative block h-full p-3 sm:p-6 rounded-2xl border border-border bg-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 overflow-hidden text-center sm:text-left"
+                className="group relative block h-full p-6 rounded-2xl border border-border bg-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 overflow-hidden"
               >
                 <div className={`absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br ${tool.gradient} opacity-10 group-hover:opacity-20 blur-2xl transition-opacity`} />
-                <div className={`relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-soft mb-3 sm:mb-5 mx-auto sm:mx-0`}>
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" strokeWidth={2.2} />
+                <div className={`relative h-12 w-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-soft mb-5`}>
+                  <Icon className="h-6 w-6 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xs sm:text-lg font-semibold mb-1 sm:mb-1.5 leading-tight">{tool.name}</h3>
-                <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">{tool.tagline}</p>
-                <div className="hidden sm:flex mt-5 items-center text-sm font-medium text-primary group-hover:gap-2 gap-1.5 transition-all">
+                <h3 className="text-lg font-semibold mb-1.5">{tool.name}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{tool.tagline}</p>
+                <div className="mt-5 flex items-center text-sm font-medium text-primary group-hover:gap-2 gap-1.5 transition-all">
                   Use tool
                   <ArrowUpRight className="h-4 w-4" />
                 </div>

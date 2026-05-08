@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { buildDocx } from "@/lib/docx";
 
 const tool = getTool("ocr-pdf");
 
@@ -47,23 +46,20 @@ export default function OcrPdf() {
     }
 
     setStatus("Recognizing text (OCR)…");
-    const sections: { heading: string; body: string }[] = [];
+    let collected = "";
     for (let i = 0; i < pages.length; i++) {
       const { data } = await Tesseract.recognize(pages[i], "eng", {
-        tessedit_pageseg_mode: "1",
-        preserve_interword_spaces: "1",
         logger: (m) => {
           if (m.status === "recognizing text") {
             setProgress(30 + ((i + m.progress) / pages.length) * 65);
           }
         },
-      } as any);
-      sections.push({ heading: `Page ${i + 1}`, body: data.text.trim() || " " });
+      });
+      collected += `\n\n--- Page ${i + 1} ---\n${data.text}`;
     }
-    const collected = sections.map((s) => `--- ${s.heading} ---\n${s.body}`).join("\n\n");
+    collected = collected.trim();
     setText(collected);
-    const docx = await buildDocx(sections, `${file.name} OCR`);
-    downloadBlob(docx, file.name.replace(/\.[^.]+$/, "") + "-ocr.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    downloadBlob(new Blob([collected], { type: "text/plain" }), file.name.replace(/\.[^.]+$/, "") + "-ocr.txt", "text/plain");
 
     return (
       <div className="space-y-3">

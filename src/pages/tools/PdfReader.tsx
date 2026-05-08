@@ -38,13 +38,10 @@ export default function PdfReader() {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
       const c = canvasRef.current!;
-      const outputScale = Math.min(window.devicePixelRatio || 1, 2.5);
-      c.width = Math.floor(viewport.width * outputScale); c.height = Math.floor(viewport.height * outputScale);
-      c.style.width = `${Math.floor(viewport.width)}px`; c.style.height = `${Math.floor(viewport.height)}px`;
+      c.width = viewport.width; c.height = viewport.height;
       const ctx = c.getContext("2d")!;
       ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-      const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined;
-      await page.render({ canvasContext: ctx, viewport, transform, canvas: c } as any).promise;
+      await page.render({ canvasContext: ctx, viewport, canvas: c } as any).promise;
     })();
   }, [pdf, pageNum, scale]);
 
@@ -82,7 +79,7 @@ export default function PdfReader() {
                   <Button variant="ghost" size="sm" onClick={() => { setFiles([]); setPdf(null); }}>Close</Button>
                 </div>
               </div>
-              <div className="overflow-auto rounded-xl bg-secondary/40 p-2 sm:p-4 max-h-[72vh] flex sm:justify-center">
+              <div className="overflow-auto rounded-xl bg-secondary/40 p-4 max-h-[70vh] flex justify-center">
                 <canvas ref={canvasRef} className="shadow-soft rounded" />
               </div>
             </div>

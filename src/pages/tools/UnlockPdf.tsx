@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
 import { downloadBlob, validatePdf } from "@/lib/file-utils";
-import { PDFDocument as CantooPDFDocument } from "@cantoo/pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
@@ -16,25 +16,26 @@ export default function UnlockPdf() {
     const file = files[0];
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());
-    let doc: CantooPDFDocument;
+    let doc: PDFDocument;
     try {
-      doc = await CantooPDFDocument.load(bytes, { ignoreEncryption: true, password: password || undefined });
+      doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
     } catch (e: any) {
-      throw new Error("Could not open this PDF. If it is encrypted, enter the correct password and try again.");
+      throw new Error("Could not open this PDF. If it uses strong encryption, try entering the password.");
     }
     if ((doc as any).isEncrypted) {
+      // pdf-lib doesn't natively decrypt; rewrite via re-save when possible
       try {
-        const out = await CantooPDFDocument.create();
+        const out = await PDFDocument.create();
         const pages = await out.copyPages(doc, doc.getPageIndices());
         pages.forEach((p) => out.addPage(p));
-        const data = await out.save({ useObjectStreams: true });
+        const data = await out.save();
         downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
         return;
       } catch {
-        throw new Error("This PDF uses encryption that cannot be safely removed in the browser. Confirm the password is correct.");
+        throw new Error("This PDF uses encryption that can't be removed in the browser.");
       }
     }
-    const data = await doc.save({ useObjectStreams: true });
+    const data = await doc.save();
     downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
   };
 

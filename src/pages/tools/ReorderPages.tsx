@@ -5,7 +5,7 @@ import { downloadBlob, validatePdf } from "@/lib/file-utils";
 import { PDFDocument } from "pdf-lib";
 import { usePdfThumbs, ThumbsLoader } from "@/components/PdfThumbs";
 import { Dropzone } from "@/components/Dropzone";
-import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
@@ -20,7 +20,7 @@ const SortableThumb = ({ id, src, index }: { id: string; src: string; index: num
       {...attributes}
       {...listeners}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`relative rounded-lg overflow-hidden border-2 cursor-grab active:cursor-grabbing touch-none transition-shadow ${
+      className={`relative rounded-lg overflow-hidden border-2 cursor-grab active:cursor-grabbing transition-shadow ${
         isDragging ? "border-primary shadow-elegant z-10" : "border-border hover:border-primary/60"
       }`}
     >
@@ -36,10 +36,7 @@ export default function ReorderPages() {
   const file = files[0];
   const { thumbs, loading } = usePdfThumbs(file);
   const [order, setOrder] = useState<number[]>([]);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 8 } })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   useEffect(() => { setOrder(thumbs.map((_, i) => i)); }, [thumbs]);
 
@@ -69,7 +66,7 @@ export default function ReorderPages() {
         <div>
           <p className="text-sm text-muted-foreground mb-3">Drag pages to rearrange.</p>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={order.map(String)} strategy={rectSortingStrategy}>
+            <SortableContext items={order} strategy={rectSortingStrategy}>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {order.map((i, displayIdx) => (
                   <SortableThumb key={i} id={String(i)} src={thumbs[i]} index={displayIdx} />
