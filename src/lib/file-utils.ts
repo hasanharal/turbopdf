@@ -18,6 +18,16 @@ export const downloadBlob = (data: Uint8Array | Blob, filename: string, type = "
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 };
 
+export const blobFromCanvas = (canvas: HTMLCanvasElement, type = "image/jpeg", quality = 0.9) =>
+  new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Could not export image.")), type, quality);
+  });
+
+export const dataUrlToBytes = (dataUrl: string) => {
+  const [, base64 = ""] = dataUrl.split(",");
+  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+};
+
 export const validatePdf = async (file: File) => {
   if (!file) throw new Error("No file selected.");
   if (file.size > 200 * 1024 * 1024) throw new Error("File is larger than 200 MB.");
