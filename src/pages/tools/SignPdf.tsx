@@ -74,12 +74,14 @@ export default function SignPdf() {
     const pageCount = doc.getPageCount();
     const target = Math.min(Math.max(1, page), pageCount) - 1;
     const sigBytes = dataUrlToBytes(signature);
-    const png = await doc.embedPng(sigBytes);
+    const image = signature.startsWith("data:image/jpeg") || signature.startsWith("data:image/jpg")
+      ? await doc.embedJpg(sigBytes)
+      : await doc.embedPng(sigBytes);
     const p = doc.getPage(target);
     const size = p.getSize();
     const w = Math.max(80, size.width * (width / 100));
-    const h = (png.height / png.width) * w;
-    p.drawImage(png, { x: (size.width - w) * (x / 100), y: Math.max(16, (size.height - h) * (y / 100)), width: w, height: h });
+    const h = (image.height / image.width) * w;
+    p.drawImage(image, { x: (size.width - w) * (x / 100), y: Math.max(16, (size.height - h) * (y / 100)), width: w, height: h });
     const data = await doc.save();
     downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-signed.pdf");
   };
