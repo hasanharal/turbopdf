@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
-import { downloadBlob, formatBytes, validatePdf } from "@/lib/file-utils";
+import { blobFromCanvas, downloadBlob, formatBytes, validatePdf } from "@/lib/file-utils";
 import { PDFDocument } from "pdf-lib";
 import { pdfjsLib } from "@/lib/pdf-worker";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,12 @@ const tool = getTool("compress-pdf");
 type Level = "low" | "medium" | "high";
 
 const LEVELS: Record<Level, { dpi: number; quality: number; label: string; sub: string }> = {
-  low: { dpi: 150, quality: 0.85, label: "Low compression", sub: "Best quality · slightly smaller" },
-  medium: { dpi: 110, quality: 0.7, label: "Recommended", sub: "Balanced quality and size" },
-  high: { dpi: 80, quality: 0.55, label: "High compression", sub: "Smallest file · lower quality" },
+  low: { dpi: 180, quality: 0.92, label: "Low compression", sub: "Sharpest text · gentle optimization" },
+  medium: { dpi: 160, quality: 0.86, label: "Recommended", sub: "Balanced quality and size" },
+  high: { dpi: 132, quality: 0.78, label: "High compression", sub: "Smaller file · still readable" },
 };
+
+const MAX_CANVAS_PIXELS = 9_000_000;
 
 export default function CompressPdf() {
   const [level, setLevel] = useState<Level>("medium");
@@ -37,7 +39,9 @@ export default function CompressPdf() {
       setStatus(`Compressing page ${i} of ${total}…`);
       const page = await pdf.getPage(i);
       const baseViewport = page.getViewport({ scale: 1 });
-      const scale = settings.dpi / 72;
+      const rawScale = settings.dpi / 72;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const scale = Math.min(rawScale * pixelRatio, Math.sqrt(MAX_CANVAS_PIXELS / (baseViewport.width * baseViewport.height)));
       const viewport = page.getViewport({ scale });
 
       const canvas = document.createElement("canvas");
@@ -49,9 +53,7 @@ export default function CompressPdf() {
 
       await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
 
-      const blob: Blob = await new Promise((res) =>
-        canvas.toBlob((b) => res(b!), "image/jpeg", settings.quality)!
-      );
+      const blob = await blobFromCanvas(canvas, "image/jpeg", settings.quality);
       const bytes = new Uint8Array(await blob.arrayBuffer());
       const jpg = await out.embedJpg(bytes);
       const newPage = out.addPage([baseViewport.width, baseViewport.height]);
@@ -63,7 +65,8 @@ export default function CompressPdf() {
     }
 
     setStatus("Saving…");
-    const compressed = await out.save({ useObjectStreams: true });
+    const rasterized = await out.save({ useObjectStreams: true });
+    const compressed = rasterized.byteLength < original ? rasterized : await PDFDocument.load(data).then((doc) => doc.save({ useObjectStreams: true }));
     const finalSize = compressed.byteLength;
     const reduction = Math.max(0, ((original - finalSize) / original) * 100);
 
