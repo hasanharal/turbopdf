@@ -12,7 +12,7 @@ export const ToolsGrid = () => (
           Every PDF tool you need, in one place
         </h2>
         <p className="mt-4 text-muted-foreground">
-          Sixteen powerful tools that run instantly in your browser. No installation. No watermarks.
+          {tools.length}+ powerful tools that run instantly in your browser. No installation. No watermarks.
         </p>
       </div>
 
