@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
 import { downloadBlob, validatePdf } from "@/lib/file-utils";
 import { PDFDocument } from "pdf-lib";
+import { pdfjsLib } from "@/lib/pdf-worker";
 import { Dropzone } from "@/components/Dropzone";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { Eraser } from "lucide-react";
 
 const tool = getTool("sign-pdf");
@@ -15,8 +17,34 @@ export default function SignPdf() {
   const [files, setFiles] = useState<File[]>([]);
   const [signature, setSignature] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
+  const [posX, setPosX] = useState(60); // % from left of page width (anchor = signature center)
+  const [posY, setPosY] = useState(85); // % from top
+  const [sigW, setSigW] = useState(25); // % of page width
+  const [preview, setPreview] = useState<string | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!files[0]) { setPreview(null); setPageCount(1); return; }
+    (async () => {
+      const data = new Uint8Array(await files[0].arrayBuffer());
+      const pdf = await pdfjsLib.getDocument({ data }).promise;
+      setPageCount(pdf.numPages);
+      const target = Math.min(Math.max(1, page), pdf.numPages);
+      const pg = await pdf.getPage(target);
+      const vp = pg.getViewport({ scale: 1.1 });
+      const c = document.createElement("canvas");
+      c.width = vp.width; c.height = vp.height;
+      const ctx = c.getContext("2d")!;
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+      await pg.render({ canvasContext: ctx, viewport: vp, canvas: c } as any).promise;
+      if (!cancelled) setPreview(c.toDataURL("image/jpeg", 0.75));
+    })();
+    return () => { cancelled = true; };
+  }, [files, page]);
 
   const start = (x: number, y: number) => {
     drawing.current = true;
@@ -31,22 +59,18 @@ export default function SignPdf() {
     ctx.lineTo(x, y); ctx.stroke();
   };
   const end = () => { drawing.current = false; };
-
   const getPos = (e: React.PointerEvent) => {
     const r = canvasRef.current!.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
-
   const clear = () => {
     const c = canvasRef.current!;
     c.getContext("2d")!.clearRect(0, 0, c.width, c.height);
     setSignature(null);
   };
-
   const captureSignature = () => {
     setSignature(canvasRef.current!.toDataURL("image/png"));
   };
-
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     const r = new FileReader();
@@ -61,22 +85,27 @@ export default function SignPdf() {
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const doc = await PDFDocument.load(bytes);
-    const pageCount = doc.getPageCount();
-    const target = Math.min(Math.max(1, page), pageCount) - 1;
+    const total = doc.getPageCount();
+    const target = Math.min(Math.max(1, page), total) - 1;
     const sigBytes = Uint8Array.from(atob(signature.split(",")[1]), (c) => c.charCodeAt(0));
     const png = await doc.embedPng(sigBytes);
     const p = doc.getPage(target);
-    const { width } = p.getSize();
-    const w = Math.min(220, width / 2);
+    const { width, height } = p.getSize();
+    const w = (sigW / 100) * width;
     const h = (png.height / png.width) * w;
-    p.drawImage(png, { x: width - w - 40, y: 40, width: w, height: h });
-    const data = await doc.save();
-    downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-signed.pdf");
+    // posX/posY are in % of page (top-left origin). pdf-lib uses bottom-left.
+    const cx = (posX / 100) * width;
+    const cy = (posY / 100) * height;
+    const x = cx - w / 2;
+    const y = height - cy - h / 2;
+    p.drawImage(png, { x, y, width: w, height: h });
+    downloadBlob(await doc.save(), file.name.replace(/\.pdf$/i, "") + "-signed.pdf");
   };
 
   const customBody = (
     <div className="space-y-5">
       <Dropzone accept="application/pdf" files={files} onFiles={setFiles} />
+
       <div className="space-y-2">
         <Label>Draw your signature</Label>
         <div className="rounded-xl border border-border bg-secondary/30 p-2">
@@ -99,9 +128,46 @@ export default function SignPdf() {
           </label>
         </div>
       </div>
-      <div className="space-y-2 max-w-[180px]">
-        <Label>Place on page #</Label>
-        <Input type="number" min={1} value={page} onChange={(e) => setPage(+e.target.value || 1)} />
+
+      {preview && (
+        <div className="rounded-2xl border border-border bg-secondary/40 p-4">
+          <p className="text-sm font-medium mb-3">Live preview — page {page} of {pageCount}</p>
+          <div className="relative inline-block max-w-full mx-auto" style={{ maxHeight: 500 }}>
+            <img src={preview} alt="Page preview" className="block max-w-full max-h-[500px] rounded-md border border-border bg-white" />
+            {signature && (
+              <img
+                src={signature}
+                alt="Signature placement"
+                className="absolute pointer-events-none drop-shadow"
+                style={{
+                  left: `${posX}%`,
+                  top: `${posY}%`,
+                  width: `${sigW}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Place on page #</Label>
+          <Input type="number" min={1} max={pageCount} value={page} onChange={(e) => setPage(Math.max(1, Math.min(pageCount, +e.target.value || 1)))} />
+        </div>
+        <div className="space-y-2">
+          <Label>Signature width: {sigW}%</Label>
+          <Slider value={[sigW]} min={10} max={60} step={1} onValueChange={(v) => setSigW(v[0])} />
+        </div>
+        <div className="space-y-2">
+          <Label>Horizontal: {posX}%</Label>
+          <Slider value={[posX]} min={0} max={100} step={1} onValueChange={(v) => setPosX(v[0])} />
+        </div>
+        <div className="space-y-2">
+          <Label>Vertical: {posY}%</Label>
+          <Slider value={[posY]} min={0} max={100} step={1} onValueChange={(v) => setPosY(v[0])} />
+        </div>
       </div>
     </div>
   );
