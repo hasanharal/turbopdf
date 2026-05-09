@@ -23,6 +23,20 @@ const DeletePages = lazy(() => import("./pages/tools/DeletePages.tsx"));
 const ReorderPages = lazy(() => import("./pages/tools/ReorderPages.tsx"));
 const SignPdf = lazy(() => import("./pages/tools/SignPdf.tsx"));
 const PdfReader = lazy(() => import("./pages/tools/PdfReader.tsx"));
+const PdfToJpg = lazy(() => import("./pages/tools/PdfToJpg.tsx"));
+const ExcelToPdf = lazy(() => import("./pages/tools/ExcelToPdf.tsx"));
+const PowerpointToPdf = lazy(() => import("./pages/tools/PowerpointToPdf.tsx"));
+const ScanToPdf = lazy(() => import("./pages/tools/ScanToPdf.tsx"));
+const CropPdf = lazy(() => import("./pages/tools/CropPdf.tsx"));
+const ExtractImages = lazy(() => import("./pages/tools/ExtractImages.tsx"));
+const EditMetadata = lazy(() => import("./pages/tools/EditMetadata.tsx"));
+const ComparePdf = lazy(() => import("./pages/tools/ComparePdf.tsx"));
+const RepairPdf = lazy(() => import("./pages/tools/RepairPdf.tsx"));
+const HtmlToPdf = lazy(() => import("./pages/tools/HtmlToPdf.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const Terms = lazy(() => import("./pages/Terms.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -41,6 +55,16 @@ const App = () => (
             <Route path="/pdf-to-word" element={<PdfToWord />} />
             <Route path="/word-to-pdf" element={<WordToPdf />} />
             <Route path="/jpg-to-pdf" element={<JpgToPdf />} />
+            <Route path="/pdf-to-jpg" element={<PdfToJpg />} />
+            <Route path="/excel-to-pdf" element={<ExcelToPdf />} />
+            <Route path="/powerpoint-to-pdf" element={<PowerpointToPdf />} />
+            <Route path="/scan-to-pdf" element={<ScanToPdf />} />
+            <Route path="/crop-pdf" element={<CropPdf />} />
+            <Route path="/extract-images" element={<ExtractImages />} />
+            <Route path="/edit-metadata" element={<EditMetadata />} />
+            <Route path="/compare-pdf" element={<ComparePdf />} />
+            <Route path="/repair-pdf" element={<RepairPdf />} />
+            <Route path="/html-to-pdf" element={<HtmlToPdf />} />
             <Route path="/ocr-pdf" element={<OcrPdf />} />
             <Route path="/unlock-pdf" element={<UnlockPdf />} />
             <Route path="/protect-pdf" element={<ProtectPdf />} />
@@ -51,6 +75,10 @@ const App = () => (
             <Route path="/reorder-pages" element={<ReorderPages />} />
             <Route path="/sign-pdf" element={<SignPdf />} />
             <Route path="/pdf-reader" element={<PdfReader />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

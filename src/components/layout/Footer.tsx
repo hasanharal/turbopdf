@@ -20,7 +20,7 @@ export const Footer = () => (
       </div>
 
       <div>
-        <h4 className="font-semibold mb-3 text-sm">Tools</h4>
+        <h4 className="font-semibold mb-3 text-sm">Popular tools</h4>
         <ul className="space-y-2">
           {tools.slice(0, 6).map((t) => (
             <li key={t.slug}>
@@ -35,17 +35,18 @@ export const Footer = () => (
       <div>
         <h4 className="font-semibold mb-3 text-sm">Company</h4>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li><a href="/#features" className="hover:text-foreground transition-colors">Features</a></li>
+          <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
+          <li><Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
+          <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
+          <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link></li>
           <li><a href="/#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
-          <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
-          <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
         </ul>
       </div>
     </div>
     <div className="border-t border-border">
       <div className="container-tight py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} TurboPDF. All rights reserved.
+          © {new Date().getFullYear()} TurboPDF. Built by M Hasan Ramzan.
         </p>
         <div className="flex items-center gap-3 text-muted-foreground">
           <a href="#" aria-label="Twitter" className="hover:text-foreground transition-colors"><Twitter className="h-4 w-4" /></a>
