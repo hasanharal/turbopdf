@@ -13,40 +13,39 @@ type DiffPage = { idx: number; left: string; right: string; diff: string; change
 export default function ComparePdf() {
   const [a, setA] = useState<File[]>([]);
   const [b, setB] = useState<File[]>([]);
-  const [results, setResults] = useState<DiffPage[]>([]);
 
-  const renderPage = async (file: File, n: number, scale = 1.2) => {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjsLib.getDocument({ data }).promise;
-    const total = pdf.numPages;
-    const page = await pdf.getPage(Math.min(n, total));
+  const renderPage = async (doc: any, n: number, scale = 1) => {
+    const page = await doc.getPage(n);
     const vp = page.getViewport({ scale });
     const c = document.createElement("canvas");
     c.width = vp.width; c.height = vp.height;
     const ctx = c.getContext("2d")!;
     ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
     await page.render({ canvasContext: ctx, viewport: vp, canvas: c } as any).promise;
-    return { canvas: c, ctx, total };
+    return { canvas: c, ctx };
   };
 
-  const process = async () => {
+  const process = async (_: File[], { setStatus, setProgress }: any) => {
     if (!a[0] || !b[0]) throw new Error("Please upload two PDFs to compare.");
     await validatePdf(a[0]); await validatePdf(b[0]);
 
+    setStatus("Loading PDFs…");
     const data1 = new Uint8Array(await a[0].arrayBuffer());
     const data2 = new Uint8Array(await b[0].arrayBuffer());
     const p1 = await pdfjsLib.getDocument({ data: data1 }).promise;
     const p2 = await pdfjsLib.getDocument({ data: data2 }).promise;
-    const pages = Math.max(p1.numPages, p2.numPages);
+    const pages = Math.min(Math.max(p1.numPages, p2.numPages), 25);
     const out: DiffPage[] = [];
 
     for (let i = 1; i <= pages; i++) {
-      const left = i <= p1.numPages ? await renderPage(a[0], i) : null;
-      const right = i <= p2.numPages ? await renderPage(b[0], i) : null;
+      setStatus(`Comparing page ${i} of ${pages}…`);
+      setProgress((i / pages) * 90);
+      const left = i <= p1.numPages ? await renderPage(p1, i) : null;
+      const right = i <= p2.numPages ? await renderPage(p2, i) : null;
       const w = Math.max(left?.canvas.width || 0, right?.canvas.width || 0);
       const h = Math.max(left?.canvas.height || 0, right?.canvas.height || 0);
       if (!w || !h) continue;
-      const norm = (src: HTMLCanvasElement | undefined) => {
+      const norm = (src?: HTMLCanvasElement) => {
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
         const ctx = c.getContext("2d")!;
@@ -62,7 +61,7 @@ export default function ComparePdf() {
       const diffData = diffCtx.createImageData(w, h);
       const ld = L.ctx.getImageData(0, 0, w, h).data;
       const rd = R.ctx.getImageData(0, 0, w, h).data;
-      const changed = pixelmatch(ld as any, rd as any, diffData.data as any, w, h, { threshold: 0.1, alpha: 0.4 });
+      const changed = pixelmatch(ld, rd, diffData.data, w, h, { threshold: 0.1, alpha: 0.4, includeAA: true });
       diffCtx.putImageData(diffData, 0, 0);
       out.push({
         idx: i,
@@ -72,7 +71,8 @@ export default function ComparePdf() {
         changed: Math.round((changed / (w * h)) * 1000) / 10,
       });
     }
-    setResults(out);
+
+    if (!out.length) throw new Error("Could not render any pages from these PDFs.");
 
     return (
       <div className="space-y-6">
@@ -84,7 +84,7 @@ export default function ComparePdf() {
                 {r.changed}% changed
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Original</p>
                 <img src={r.left} className="w-full border border-border rounded-md" alt="A" />

@@ -11,6 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 const tool = getTool("html-to-pdf");
 
+const PROXIES = [
+  (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u: string) => `https://r.jina.ai/${u}`, // markdown-ish fallback
+];
+
 export default function HtmlToPdf() {
   const [tab, setTab] = useState<"html" | "url">("html");
   const [html, setHtml] = useState("<h1>Hello TurboPDF</h1>\n<p>Paste any HTML here and it will be converted into a clean PDF.</p>");
@@ -21,38 +27,49 @@ export default function HtmlToPdf() {
     wrapper.style.position = "fixed";
     wrapper.style.top = "-10000px";
     wrapper.style.left = "0";
-    wrapper.style.width = "794px"; // A4 width @ 96dpi
+    wrapper.style.width = "1024px";
     wrapper.style.padding = "32px";
     wrapper.style.background = "#fff";
     wrapper.style.color = "#0f172a";
     wrapper.style.fontFamily = "Inter, system-ui, sans-serif";
-    if (baseHref) {
-      wrapper.innerHTML = `<base href="${baseHref}">` + sourceHtml;
-    } else {
-      wrapper.innerHTML = sourceHtml;
-    }
+    wrapper.innerHTML = (baseHref ? `<base href="${baseHref}">` : "") + sourceHtml;
     document.body.appendChild(wrapper);
     try {
-      const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
+      // Wait for images to load (best-effort)
+      const imgs = Array.from(wrapper.querySelectorAll("img"));
+      await Promise.all(imgs.map((img) => img.complete ? Promise.resolve() : new Promise((res) => { img.onload = img.onerror = () => res(null); })));
+
+      const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff", windowWidth: 1024 });
       const pdf = new jsPDF({ unit: "pt", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
       const imgW = pageW;
       const imgH = (canvas.height * imgW) / canvas.width;
-      let remaining = imgH;
-      let y = 0;
-      const img = canvas.toDataURL("image/jpeg", 0.92);
-      // Slice into pages
-      while (remaining > 0) {
-        pdf.addImage(img, "JPEG", 0, y === 0 ? 0 : -y, imgW, imgH);
-        remaining -= pageH;
-        y += pageH;
-        if (remaining > 0) pdf.addPage();
+
+      const totalPages = Math.ceil(imgH / pageH);
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, -i * pageH, imgW, imgH);
       }
       return pdf.output("blob");
     } finally {
       wrapper.remove();
     }
+  };
+
+  const fetchUrl = async (u: string, setStatus: any) => {
+    // Try direct first, then proxies
+    const attempts = [u, ...PROXIES.map((p) => p(u))];
+    for (let i = 0; i < attempts.length; i++) {
+      try {
+        setStatus(`Fetching webpage${i ? ` (proxy ${i})` : ""}…`);
+        const res = await fetch(attempts[i]);
+        if (!res.ok) throw new Error(String(res.status));
+        const text = await res.text();
+        if (text && text.length > 100) return text;
+      } catch {}
+    }
+    throw new Error("Could not fetch this URL. The site may block all cross-origin access. Try pasting its HTML instead.");
   };
 
   const process = async (_: File[], { setStatus }: any) => {
@@ -63,16 +80,10 @@ export default function HtmlToPdf() {
       downloadBlob(blob, "page.pdf");
     } else {
       if (!url.trim()) throw new Error("Please enter a URL.");
-      setStatus("Fetching webpage…");
-      let html: string;
-      try {
-        const res = await fetch(url);
-        html = await res.text();
-      } catch {
-        throw new Error("Could not fetch this URL. The page may block cross-origin requests. Try pasting its HTML instead.");
-      }
+      const u = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const fetched = await fetchUrl(u, setStatus);
       setStatus("Rendering page…");
-      const blob = await renderHtmlToPdf(html, url);
+      const blob = await renderHtmlToPdf(fetched, u);
       downloadBlob(blob, "webpage.pdf");
     }
   };
@@ -90,7 +101,7 @@ export default function HtmlToPdf() {
       <TabsContent value="url" className="space-y-2 mt-4">
         <Label>Page URL</Label>
         <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/article" type="url" />
-        <p className="text-xs text-muted-foreground">Some sites block cross-origin fetching. If a URL fails, copy the page HTML instead.</p>
+        <p className="text-xs text-muted-foreground">We try direct fetch first, then fall back through CORS proxies. Some heavily-protected sites may still refuse access.</p>
       </TabsContent>
     </Tabs>
   );

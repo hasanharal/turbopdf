@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { PageLoader } from "./components/PageLoader";
+import { FloatingFeedback } from "./components/feedback/FloatingFeedback";
+import { AnnouncementPopup } from "./components/feedback/AnnouncementPopup";
 
 const CompressPdf = lazy(() => import("./pages/tools/CompressPdf.tsx"));
 const MergePdf = lazy(() => import("./pages/tools/MergePdf.tsx"));
@@ -37,6 +40,8 @@ const About = lazy(() => import("./pages/About.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const Terms = lazy(() => import("./pages/Terms.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin.tsx"));
+const AdminPanel = lazy(() => import("./pages/admin/AdminPanel.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -46,7 +51,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>}>
+        <Suspense fallback={<PageLoader label="Loading TurboPDF…" />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/compress-pdf" element={<CompressPdf />} />
@@ -79,9 +84,13 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/panel" element={<AdminPanel />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <AnnouncementPopup />
+        <FloatingFeedback />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

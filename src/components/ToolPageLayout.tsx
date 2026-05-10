@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download, ShieldCheck } from "lucide-react";
+import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download, ShieldCheck, Sparkles } from "lucide-react";
 import { useState, ReactNode, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Seo } from "@/components/Seo";
 import { Tool } from "@/lib/tools";
+import { PostTaskPrompt } from "@/components/feedback/PostTaskPrompt";
+import { motion, AnimatePresence } from "framer-motion";
 
 type State = "idle" | "processing" | "success" | "error";
 
@@ -19,7 +21,6 @@ export type ProcessCtx = {
 type Props = {
   tool: Tool;
   process: (files: File[], ctx: ProcessCtx) => Promise<ReactNode | void>;
-  /** Slot rendered above the action button — for tool-specific options */
   options?: (files: File[]) => ReactNode;
   helper?: ReactNode;
   ctaLabel?: string;
@@ -34,6 +35,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
   const [result, setResult] = useState<ReactNode>(null);
+  const [doneCount, setDoneCount] = useState(0);
   const Icon = tool.icon;
 
   const run = useCallback(async () => {
@@ -41,7 +43,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
     setState("processing");
     setError("");
     setProgress(0);
-    setStatus("Preparing…");
+    setStatus("Preparing your file…");
     setResult(null);
     try {
       const r = await process(files, { setProgress, setStatus });
@@ -49,6 +51,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
       setStatus("Done");
       if (r) setResult(r);
       setState("success");
+      setDoneCount((n) => n + 1);
     } catch (e: any) {
       console.error(e);
       setError(e?.message || "Something went wrong. Please try a different file.");
@@ -104,15 +107,33 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
               {options && files.length > 0 && state !== "success" && <div className="mt-6">{options(files)}</div>}
               {helper && <div className="mt-5">{helper}</div>}
 
-              {state === "processing" && (
-                <div className="mt-6 space-y-2 animate-fade-in">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{status || "Processing…"}</span>
-                    <span>{Math.round(progress)}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                </div>
-              )}
+              <AnimatePresence>
+                {state === "processing" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-6 rounded-xl border border-border bg-secondary/40 p-4 sm:p-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-hero-gradient shadow-glow-primary">
+                        <Sparkles className="h-5 w-5 text-white animate-pulse" />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{status || "Processing…"}</p>
+                        <p className="text-xs text-muted-foreground">Working entirely in your browser — your file stays private.</p>
+                      </div>
+                      <span className="text-xs font-mono text-muted-foreground tabular-nums">{Math.round(progress)}%</span>
+                    </div>
+                    <Progress value={progress} className="mt-3 h-1.5" />
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {[0,1,2].map((i) => (
+                        <div key={i} className="h-1 rounded-full bg-gradient-to-r from-transparent via-primary/40 to-transparent bg-[length:200%_100%] animate-shimmer" style={{ animationDelay: `${i * 200}ms` }} />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {state === "error" && (
                 <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 animate-fade-in">
@@ -164,6 +185,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
         </section>
       </main>
       <Footer />
+      <PostTaskPrompt tool={tool.name} trigger={doneCount} />
     </div>
   );
 };

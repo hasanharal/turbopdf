@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { Zap, Github, Twitter } from "lucide-react";
-import { tools } from "@/lib/tools";
+import { Zap, Github, Twitter, Lock } from "lucide-react";
 
 export const Footer = () => (
   <footer className="border-t border-border bg-subtle-gradient">
-    <div className="container-tight py-14 grid gap-10 md:grid-cols-4">
+    <div className="container-tight py-14 grid gap-10 md:grid-cols-3">
       <div className="md:col-span-2">
         <Link to="/" className="flex items-center gap-2 mb-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-hero-gradient">
@@ -14,22 +13,9 @@ export const Footer = () => (
             Turbo<span className="text-gradient">PDF</span>
           </span>
         </Link>
-        <p className="text-sm text-muted-foreground max-w-sm">
+        <p className="text-sm text-muted-foreground max-w-md">
           Fast, free and secure PDF tools that run directly in your browser. Your files never leave your device.
         </p>
-      </div>
-
-      <div>
-        <h4 className="font-semibold mb-3 text-sm">Popular tools</h4>
-        <ul className="space-y-2">
-          {tools.slice(0, 6).map((t) => (
-            <li key={t.slug}>
-              <Link to={`/${t.slug}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {t.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div>
@@ -40,6 +26,11 @@ export const Footer = () => (
           <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
           <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link></li>
           <li><a href="/#faq" className="hover:text-foreground transition-colors">FAQ</a></li>
+          <li>
+            <Link to="/admin" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Lock className="h-3 w-3" /> Admin
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
