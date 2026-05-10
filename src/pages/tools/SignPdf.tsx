@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Eraser } from "lucide-react";
+import { Eraser, MousePointerClick } from "lucide-react";
 
 const tool = getTool("sign-pdf");
 
@@ -18,13 +18,15 @@ export default function SignPdf() {
   const [signature, setSignature] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [posX, setPosX] = useState(60); // % from left of page width (anchor = signature center)
-  const [posY, setPosY] = useState(85); // % from top
-  const [sigW, setSigW] = useState(25); // % of page width
+  const [posX, setPosX] = useState(60);
+  const [posY, setPosY] = useState(85);
+  const [sigW, setSigW] = useState(25);
   const [preview, setPreview] = useState<string | null>(null);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const padRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
+  const previewWrapRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,37 +48,30 @@ export default function SignPdf() {
     return () => { cancelled = true; };
   }, [files, page]);
 
-  const start = (x: number, y: number) => {
-    drawing.current = true;
-    const ctx = canvasRef.current!.getContext("2d")!;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  };
-  const move = (x: number, y: number) => {
-    if (!drawing.current) return;
-    const ctx = canvasRef.current!.getContext("2d")!;
-    ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a";
-    ctx.lineTo(x, y); ctx.stroke();
-  };
+  // Signature pad handlers
+  const start = (x: number, y: number) => { drawing.current = true; const ctx = padRef.current!.getContext("2d")!; ctx.beginPath(); ctx.moveTo(x, y); };
+  const move = (x: number, y: number) => { if (!drawing.current) return; const ctx = padRef.current!.getContext("2d")!; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a"; ctx.lineTo(x, y); ctx.stroke(); };
   const end = () => { drawing.current = false; };
-  const getPos = (e: React.PointerEvent) => {
-    const r = canvasRef.current!.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
-  };
-  const clear = () => {
-    const c = canvasRef.current!;
-    c.getContext("2d")!.clearRect(0, 0, c.width, c.height);
-    setSignature(null);
-  };
-  const captureSignature = () => {
-    setSignature(canvasRef.current!.toDataURL("image/png"));
-  };
+  const padPos = (e: React.PointerEvent) => { const r = padRef.current!.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const clear = () => { const c = padRef.current!; c.getContext("2d")!.clearRect(0, 0, c.width, c.height); setSignature(null); };
+  const captureSignature = () => setSignature(padRef.current!.toDataURL("image/png"));
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => setSignature(r.result as string);
-    r.readAsDataURL(f);
+    const r = new FileReader(); r.onload = () => setSignature(r.result as string); r.readAsDataURL(f);
   };
+
+  // Drag the signature on the preview
+  const setFromEvent = (e: React.PointerEvent) => {
+    const el = previewWrapRef.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    setPosX(Math.max(0, Math.min(100, x)));
+    setPosY(Math.max(0, Math.min(100, y)));
+  };
+  const startDrag = (e: React.PointerEvent) => { if (!signature) return; dragging.current = true; setFromEvent(e); (e.target as Element).setPointerCapture?.(e.pointerId); };
+  const moveDrag = (e: React.PointerEvent) => { if (dragging.current) setFromEvent(e); };
+  const endDrag = () => { dragging.current = false; };
 
   const process = async () => {
     const file = files[0];
@@ -93,7 +88,6 @@ export default function SignPdf() {
     const { width, height } = p.getSize();
     const w = (sigW / 100) * width;
     const h = (png.height / png.width) * w;
-    // posX/posY are in % of page (top-left origin). pdf-lib uses bottom-left.
     const cx = (posX / 100) * width;
     const cy = (posY / 100) * height;
     const x = cx - w / 2;
@@ -110,12 +104,12 @@ export default function SignPdf() {
         <Label>Draw your signature</Label>
         <div className="rounded-xl border border-border bg-secondary/30 p-2">
           <canvas
-            ref={canvasRef}
+            ref={padRef}
             width={600}
             height={180}
             className="w-full bg-background rounded-lg touch-none"
-            onPointerDown={(e) => { const p = getPos(e); start(p.x, p.y); }}
-            onPointerMove={(e) => { const p = getPos(e); move(p.x, p.y); }}
+            onPointerDown={(e) => { const p = padPos(e); start(p.x, p.y); }}
+            onPointerMove={(e) => { const p = padPos(e); move(p.x, p.y); }}
             onPointerUp={() => { end(); captureSignature(); }}
             onPointerLeave={end}
           />
@@ -131,22 +125,30 @@ export default function SignPdf() {
 
       {preview && (
         <div className="rounded-2xl border border-border bg-secondary/40 p-4">
-          <p className="text-sm font-medium mb-3">Live preview — page {page} of {pageCount}</p>
-          <div className="relative inline-block max-w-full mx-auto" style={{ maxHeight: 500 }}>
-            <img src={preview} alt="Page preview" className="block max-w-full max-h-[500px] rounded-md border border-border bg-white" />
-            {signature && (
-              <img
-                src={signature}
-                alt="Signature placement"
-                className="absolute pointer-events-none drop-shadow"
-                style={{
-                  left: `${posX}%`,
-                  top: `${posY}%`,
-                  width: `${sigW}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              />
-            )}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium">Live preview — page {page} of {pageCount}</p>
+            {signature && <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><MousePointerClick className="h-3.5 w-3.5" /> Drag to position</p>}
+          </div>
+          <div className="flex justify-center">
+            <div
+              ref={previewWrapRef}
+              className="relative inline-block max-w-full select-none touch-none"
+              style={{ maxHeight: 500 }}
+              onPointerDown={startDrag}
+              onPointerMove={moveDrag}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+            >
+              <img src={preview} alt="Page preview" draggable={false} className="block max-w-full max-h-[500px] rounded-md border border-border bg-white pointer-events-none" />
+              {signature && (
+                <img
+                  src={signature}
+                  alt=""
+                  className="absolute pointer-events-none drop-shadow ring-2 ring-primary/40 rounded-sm"
+                  style={{ left: `${posX}%`, top: `${posY}%`, width: `${sigW}%`, transform: "translate(-50%, -50%)" }}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -159,14 +161,6 @@ export default function SignPdf() {
         <div className="space-y-2">
           <Label>Signature width: {sigW}%</Label>
           <Slider value={[sigW]} min={10} max={60} step={1} onValueChange={(v) => setSigW(v[0])} />
-        </div>
-        <div className="space-y-2">
-          <Label>Horizontal: {posX}%</Label>
-          <Slider value={[posX]} min={0} max={100} step={1} onValueChange={(v) => setPosX(v[0])} />
-        </div>
-        <div className="space-y-2">
-          <Label>Vertical: {posY}%</Label>
-          <Slider value={[posY]} min={0} max={100} step={1} onValueChange={(v) => setPosY(v[0])} />
         </div>
       </div>
     </div>
