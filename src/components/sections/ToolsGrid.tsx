@@ -32,7 +32,7 @@ export const ToolsGrid = () => (
               >
                 <div className={`absolute -top-8 -right-8 h-20 w-20 rounded-full bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-20 blur-2xl transition-opacity`} />
                 <div className={`relative h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-soft mb-2.5`}>
-                  <Icon className="h-5 w-5 sm:h-5.5 sm:w-5.5 text-white" strokeWidth={2.2} />
+                  <Icon className="h-5 w-5 text-white" strokeWidth={2.2} />
                 </div>
                 <h3 className="text-[11px] sm:text-xs font-semibold leading-tight line-clamp-2">{tool.name}</h3>
               </Link>
