@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
 import { tools } from "@/lib/tools";
 
 export const ToolsGrid = () => (
   <section id="tools" className="py-20 sm:py-28 bg-subtle-gradient">
     <div className="container-tight">
-      <div className="text-center max-w-2xl mx-auto mb-14">
+      <div className="text-center max-w-2xl mx-auto mb-12">
         <p className="text-sm font-semibold text-primary mb-3">All-in-one toolkit</p>
         <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
           Every PDF tool you need, in one place
@@ -16,31 +15,26 @@ export const ToolsGrid = () => (
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {tools.map((tool, i) => {
           const Icon = tool.icon;
           return (
             <motion.div
               key={tool.slug}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
+              transition={{ duration: 0.35, delay: Math.min(i * 0.025, 0.4) }}
             >
               <Link
                 to={`/${tool.slug}`}
-                className="group relative block h-full p-6 rounded-2xl border border-border bg-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                className="group relative flex flex-col items-center justify-start text-center h-full p-3 sm:p-4 rounded-2xl border border-border bg-card hover:shadow-soft hover:border-primary/40 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden"
               >
-                <div className={`absolute -top-12 -right-12 h-32 w-32 rounded-full bg-gradient-to-br ${tool.gradient} opacity-10 group-hover:opacity-20 blur-2xl transition-opacity`} />
-                <div className={`relative h-12 w-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-soft mb-5`}>
-                  <Icon className="h-6 w-6 text-white" strokeWidth={2.2} />
+                <div className={`absolute -top-8 -right-8 h-20 w-20 rounded-full bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-20 blur-2xl transition-opacity`} />
+                <div className={`relative h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-soft mb-2.5`}>
+                  <Icon className="h-5 w-5 sm:h-5.5 sm:w-5.5 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-lg font-semibold mb-1.5">{tool.name}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{tool.tagline}</p>
-                <div className="mt-5 flex items-center text-sm font-medium text-primary group-hover:gap-2 gap-1.5 transition-all">
-                  Use tool
-                  <ArrowUpRight className="h-4 w-4" />
-                </div>
+                <h3 className="text-[11px] sm:text-xs font-semibold leading-tight line-clamp-2">{tool.name}</h3>
               </Link>
             </motion.div>
           );
