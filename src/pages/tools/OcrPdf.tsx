@@ -15,18 +15,20 @@ import { supabase } from "@/integrations/supabase/client";
 
 const tool = getTool("ocr-pdf");
 
-const LANGS: { value: string; label: string }[] = [
-  { value: "auto", label: "Auto-detect (multilingual)" },
-  { value: "English", label: "English" },
-  { value: "Urdu", label: "Urdu" },
-  { value: "Arabic", label: "Arabic" },
-  { value: "Spanish", label: "Spanish" },
-  { value: "French", label: "French" },
-  { value: "German", label: "German" },
-  { value: "Chinese (Simplified)", label: "Chinese" },
-  { value: "Hindi", label: "Hindi" },
-  { value: "Russian", label: "Russian" },
+const LANGS: { value: string; label: string; tess: string }[] = [
+  { value: "auto", label: "Auto-detect (multilingual)", tess: "eng" },
+  { value: "English", label: "English", tess: "eng" },
+  { value: "Urdu", label: "Urdu", tess: "urd" },
+  { value: "Arabic", label: "Arabic", tess: "ara" },
+  { value: "Spanish", label: "Spanish", tess: "spa" },
+  { value: "French", label: "French", tess: "fra" },
+  { value: "German", label: "German", tess: "deu" },
+  { value: "Chinese (Simplified)", label: "Chinese", tess: "chi_sim" },
+  { value: "Hindi", label: "Hindi", tess: "hin" },
+  { value: "Russian", label: "Russian", tess: "rus" },
 ];
+
+const tessLang = (val: string) => LANGS.find((l) => l.value === val)?.tess || "eng";
 
 // Preprocess canvas: grayscale, contrast boost, light sharpening — improves OCR on scans/photos
 function preprocess(canvas: HTMLCanvasElement) {
