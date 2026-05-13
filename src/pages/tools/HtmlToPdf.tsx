@@ -65,10 +65,10 @@ export default function HtmlToPdf() {
         const res = await fetch(attempts[i]);
         if (!res.ok) throw new Error(String(res.status));
         const text = await res.text();
-        if (text && text.length > 100) return text;
+        if (text && text.length > 100 && /<\s*html|<\s*body|<\s*head|<\s*div/i.test(text)) return text;
       } catch {}
     }
-    throw new Error("Could not fetch this URL. The site may block all cross-origin access. Try pasting its HTML instead.");
+    throw new Error("This site blocks cross-origin access. Please use 'Paste HTML' instead — open the page, View Source, copy and paste the HTML here.");
   };
 
   const process = async (_: File[], { setStatus }: any) => {
