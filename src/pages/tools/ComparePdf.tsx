@@ -34,7 +34,8 @@ export default function ComparePdf() {
     const data2 = new Uint8Array(await b[0].arrayBuffer());
     const p1 = await pdfjsLib.getDocument({ data: data1 }).promise;
     const p2 = await pdfjsLib.getDocument({ data: data2 }).promise;
-    const pages = Math.min(Math.max(p1.numPages, p2.numPages), 25);
+    const maxPages = Math.max(p1.numPages, p2.numPages);
+    const pages = Math.min(maxPages, 25);
     const out: DiffPage[] = [];
 
     for (let i = 1; i <= pages; i++) {
