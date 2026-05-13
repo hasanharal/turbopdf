@@ -38,7 +38,6 @@ export default function JpgToPdf() {
       if (!(await isValidImage(file))) {
         throw new Error(`"${file.name}" is not a valid JPG, PNG or WebP image.`);
       }
-    for (const file of files) {
       const bytes = await fileToBytes(file);
       let embedded;
       if (file.type === "image/png") {
