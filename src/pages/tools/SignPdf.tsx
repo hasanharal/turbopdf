@@ -109,8 +109,8 @@ export default function SignPdf() {
             className="w-full bg-background rounded-lg touch-none"
             onPointerDown={(e) => { const p = padPos(e); start(p.x, p.y); }}
             onPointerMove={(e) => { const p = padPos(e); move(p.x, p.y); }}
-            onPointerUp={() => { end(); captureSignature(); }}
-            onPointerLeave={end}
+            onPointerUp={end}
+            onPointerCancel={end}
           />
         </div>
         <div className="flex flex-wrap gap-2">
