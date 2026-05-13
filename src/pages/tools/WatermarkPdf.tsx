@@ -139,5 +139,5 @@ export default function WatermarkPdf() {
     </div>
   );
 
-  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone />;
+  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone ctaLabel="Add Watermark & Download" />;
 }
