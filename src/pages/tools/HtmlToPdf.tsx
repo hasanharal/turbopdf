@@ -14,7 +14,6 @@ const tool = getTool("html-to-pdf");
 const PROXIES = [
   (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  (u: string) => `https://r.jina.ai/${u}`, // markdown-ish fallback
 ];
 
 export default function HtmlToPdf() {
