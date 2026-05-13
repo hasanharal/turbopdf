@@ -112,7 +112,7 @@ export const tools: Tool[] = [
     description: "Export PowerPoint presentations as PDF documents with slide layouts, fonts and content preserved.",
     icon: Presentation,
     gradient: "from-orange-500 to-red-500",
-    accept: ".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    accept: ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation",
     multiple: false,
     category: "Convert",
   },

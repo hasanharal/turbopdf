@@ -1,11 +1,7 @@
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
 import { downloadBlob } from "@/lib/file-utils";
-import * as pdfjsLib from "pdfjs-dist";
-// @ts-ignore - vite asset import
-import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+import { pdfjsLib } from "@/lib/pdf-worker";
 
 const tool = getTool("pdf-to-word")!;
 

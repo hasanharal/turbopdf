@@ -14,7 +14,6 @@ const tool = getTool("html-to-pdf");
 const PROXIES = [
   (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  (u: string) => `https://r.jina.ai/${u}`, // markdown-ish fallback
 ];
 
 export default function HtmlToPdf() {
@@ -66,10 +65,10 @@ export default function HtmlToPdf() {
         const res = await fetch(attempts[i]);
         if (!res.ok) throw new Error(String(res.status));
         const text = await res.text();
-        if (text && text.length > 100) return text;
+        if (text && text.length > 100 && /<\s*html|<\s*body|<\s*head|<\s*div/i.test(text)) return text;
       } catch {}
     }
-    throw new Error("Could not fetch this URL. The site may block all cross-origin access. Try pasting its HTML instead.");
+    throw new Error("This site blocks cross-origin access. Please use 'Paste HTML' instead — open the page, View Source, copy and paste the HTML here.");
   };
 
   const process = async (_: File[], { setStatus }: any) => {
@@ -101,7 +100,7 @@ export default function HtmlToPdf() {
       <TabsContent value="url" className="space-y-2 mt-4">
         <Label>Page URL</Label>
         <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/article" type="url" />
-        <p className="text-xs text-muted-foreground">We try direct fetch first, then fall back through CORS proxies. Some heavily-protected sites may still refuse access.</p>
+        <p className="text-xs text-muted-foreground">Best for simple/static pages. Sites with Cloudflare, login walls, or strict CSP often refuse cross-origin fetches — in that case use the "Paste HTML" tab instead.</p>
       </TabsContent>
     </Tabs>
   );

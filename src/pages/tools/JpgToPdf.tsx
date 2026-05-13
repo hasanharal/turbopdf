@@ -20,10 +20,24 @@ const decodeImageDims = (file: File): Promise<{ w: number; h: number }> =>
     img.src = url;
   });
 
+const isValidImage = async (file: File) => {
+  const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  // JPEG: FF D8 FF
+  if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return true;
+  // PNG: 89 50 4E 47
+  if (head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47) return true;
+  // WebP: "RIFF....WEBP"
+  if (head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46 && head[8] === 0x57 && head[9] === 0x45) return true;
+  return false;
+};
+
 export default function JpgToPdf() {
   const process = async (files: File[]) => {
     const pdf = await PDFDocument.create();
     for (const file of files) {
+      if (!(await isValidImage(file))) {
+        throw new Error(`"${file.name}" is not a valid JPG, PNG or WebP image.`);
+      }
       const bytes = await fileToBytes(file);
       let embedded;
       if (file.type === "image/png") {

@@ -51,10 +51,9 @@ export default function SignPdf() {
   // Signature pad handlers
   const start = (x: number, y: number) => { drawing.current = true; const ctx = padRef.current!.getContext("2d")!; ctx.beginPath(); ctx.moveTo(x, y); };
   const move = (x: number, y: number) => { if (!drawing.current) return; const ctx = padRef.current!.getContext("2d")!; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a"; ctx.lineTo(x, y); ctx.stroke(); };
-  const end = () => { drawing.current = false; };
+  const end = () => { if (drawing.current) { drawing.current = false; setSignature(padRef.current!.toDataURL("image/png")); } };
   const padPos = (e: React.PointerEvent) => { const r = padRef.current!.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
   const clear = () => { const c = padRef.current!; c.getContext("2d")!.clearRect(0, 0, c.width, c.height); setSignature(null); };
-  const captureSignature = () => setSignature(padRef.current!.toDataURL("image/png"));
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
     const r = new FileReader(); r.onload = () => setSignature(r.result as string); r.readAsDataURL(f);
@@ -110,8 +109,8 @@ export default function SignPdf() {
             className="w-full bg-background rounded-lg touch-none"
             onPointerDown={(e) => { const p = padPos(e); start(p.x, p.y); }}
             onPointerMove={(e) => { const p = padPos(e); move(p.x, p.y); }}
-            onPointerUp={() => { end(); captureSignature(); }}
-            onPointerLeave={end}
+            onPointerUp={end}
+            onPointerCancel={end}
           />
         </div>
         <div className="flex flex-wrap gap-2">

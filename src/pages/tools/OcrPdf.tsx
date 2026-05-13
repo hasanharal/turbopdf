@@ -15,18 +15,20 @@ import { supabase } from "@/integrations/supabase/client";
 
 const tool = getTool("ocr-pdf");
 
-const LANGS: { value: string; label: string }[] = [
-  { value: "auto", label: "Auto-detect (multilingual)" },
-  { value: "English", label: "English" },
-  { value: "Urdu", label: "Urdu" },
-  { value: "Arabic", label: "Arabic" },
-  { value: "Spanish", label: "Spanish" },
-  { value: "French", label: "French" },
-  { value: "German", label: "German" },
-  { value: "Chinese (Simplified)", label: "Chinese" },
-  { value: "Hindi", label: "Hindi" },
-  { value: "Russian", label: "Russian" },
+const LANGS: { value: string; label: string; tess: string }[] = [
+  { value: "auto", label: "Auto-detect (multilingual)", tess: "eng" },
+  { value: "English", label: "English", tess: "eng" },
+  { value: "Urdu", label: "Urdu", tess: "urd" },
+  { value: "Arabic", label: "Arabic", tess: "ara" },
+  { value: "Spanish", label: "Spanish", tess: "spa" },
+  { value: "French", label: "French", tess: "fra" },
+  { value: "German", label: "German", tess: "deu" },
+  { value: "Chinese (Simplified)", label: "Chinese", tess: "chi_sim" },
+  { value: "Hindi", label: "Hindi", tess: "hin" },
+  { value: "Russian", label: "Russian", tess: "rus" },
 ];
+
+const tessLang = (val: string) => LANGS.find((l) => l.value === val)?.tess || "eng";
 
 // Preprocess canvas: grayscale, contrast boost, light sharpening — improves OCR on scans/photos
 function preprocess(canvas: HTMLCanvasElement) {
@@ -107,6 +109,7 @@ export default function OcrPdf() {
       setStatus("Running AI OCR (handwriting & multilingual)…");
       // Process in batches of 3 images per request to stay under payload limits
       const batchSize = 3;
+      let aiFellBack = false;
       for (let i = 0; i < pages.length; i += batchSize) {
         const slice = pages.slice(i, i + batchSize);
         const images = await Promise.all(slice.map((c) => canvasToBase64(c)));
@@ -114,10 +117,18 @@ export default function OcrPdf() {
           body: { images, language, mode: "structured" },
         });
         if (error) {
-          // Fall back to tesseract for this batch
+          // Fall back to tesseract for this batch (with chosen language)
           console.warn("AI OCR failed, falling back to local OCR:", error);
+          if (!aiFellBack) {
+            aiFellBack = true;
+            toast.warning("AI OCR unavailable — using on-device OCR instead.", {
+              description: "Results may be less accurate, especially for handwriting.",
+            });
+          }
+          const lang = tessLang(language);
           for (let j = 0; j < slice.length; j++) {
-            const r = await Tesseract.recognize(slice[j], "eng");
+            setStatus(`Local OCR — page ${i + j + 1} of ${pages.length}…`);
+            const r = await Tesseract.recognize(slice[j], lang);
             collected += `\n\n--- Page ${i + j + 1} ---\n${r.data.text}`;
           }
         } else {
@@ -126,9 +137,10 @@ export default function OcrPdf() {
         setProgress(25 + ((i + slice.length) / pages.length) * 70);
       }
     } else {
-      setStatus("Recognizing text locally…");
+      const lang = tessLang(language);
+      setStatus(`Recognizing text locally (${lang})…`);
       for (let i = 0; i < pages.length; i++) {
-        const { data } = await Tesseract.recognize(pages[i], "eng", {
+        const { data } = await Tesseract.recognize(pages[i], lang, {
           logger: (m) => {
             if (m.status === "recognizing text") {
               setProgress(25 + ((i + m.progress) / pages.length) * 70);
@@ -176,17 +188,20 @@ export default function OcrPdf() {
         </div>
         <Switch id="ai-ocr" checked={useAi} onCheckedChange={setUseAi} />
       </div>
-      {useAi && (
-        <div>
-          <Label className="text-sm font-semibold mb-2 block">Document language</Label>
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {LANGS.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      <div>
+        <Label className="text-sm font-semibold mb-2 block">Document language</Label>
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {LANGS.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {!useAi && (
+          <p className="text-xs text-muted-foreground mt-2">
+            On-device OCR will download a language model on first use (5–30&nbsp;MB depending on language).
+          </p>
+        )}
+      </div>
     </div>
   );
 

@@ -28,9 +28,11 @@ export const deleteFeedback = (id: string) => {
 
 export const clearFeedback = () => localStorage.removeItem(KEY);
 
-// Admin auth (client-side only — for lightweight panel)
-export const ADMIN_USER = "admin";
-export const ADMIN_PASS = "turbopdf2025";
+// Admin auth (client-side only — for lightweight panel).
+// Override these in production via Vite env vars (VITE_ADMIN_USER / VITE_ADMIN_PASS)
+// since anything in the bundle is readable by users. For real security, move auth server-side.
+export const ADMIN_USER = (import.meta.env.VITE_ADMIN_USER as string) || "admin";
+export const ADMIN_PASS = (import.meta.env.VITE_ADMIN_PASS as string) || "turbopdf2025";
 const ADMIN_KEY = "turbopdf_admin_v1";
 
 export const isAdminAuthed = () => localStorage.getItem(ADMIN_KEY) === "1";

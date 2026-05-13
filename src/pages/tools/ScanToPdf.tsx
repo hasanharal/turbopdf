@@ -21,6 +21,9 @@ export default function ScanToPdf() {
 
   const start = async () => {
     try {
+      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Camera requires a secure (HTTPS) connection. Please open this page over HTTPS or on localhost.");
+      }
       const s = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false,
@@ -32,7 +35,9 @@ export default function ScanToPdf() {
       }
       setActive(true);
     } catch (e: any) {
-      throw new Error("Camera access denied. Please allow camera permissions.");
+      if (e?.name === "NotAllowedError") throw new Error("Camera permission denied. Please allow camera access in your browser.");
+      if (e?.name === "NotFoundError") throw new Error("No camera was found on this device.");
+      throw new Error(e?.message || "Could not start the camera.");
     }
   };
   const stop = () => {
