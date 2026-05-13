@@ -100,7 +100,7 @@ export default function HtmlToPdf() {
       <TabsContent value="url" className="space-y-2 mt-4">
         <Label>Page URL</Label>
         <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/article" type="url" />
-        <p className="text-xs text-muted-foreground">We try direct fetch first, then fall back through CORS proxies. Some heavily-protected sites may still refuse access.</p>
+        <p className="text-xs text-muted-foreground">Best for simple/static pages. Sites with Cloudflare, login walls, or strict CSP often refuse cross-origin fetches — in that case use the "Paste HTML" tab instead.</p>
       </TabsContent>
     </Tabs>
   );
