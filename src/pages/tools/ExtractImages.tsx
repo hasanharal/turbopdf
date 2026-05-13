@@ -14,6 +14,8 @@ type Img = { name: string; url: string; blob: Blob };
 export default function ExtractImages() {
   const [imgs, setImgs] = useState<Img[]>([]);
 
+  useEffect(() => () => { imgs.forEach((i) => URL.revokeObjectURL(i.url)); }, [imgs]);
+
   const process = async (files: File[], { setProgress, setStatus }: any) => {
     const file = files[0];
     await validatePdf(file);
