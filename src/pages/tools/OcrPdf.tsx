@@ -188,17 +188,20 @@ export default function OcrPdf() {
         </div>
         <Switch id="ai-ocr" checked={useAi} onCheckedChange={setUseAi} />
       </div>
-      {useAi && (
-        <div>
-          <Label className="text-sm font-semibold mb-2 block">Document language</Label>
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {LANGS.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      <div>
+        <Label className="text-sm font-semibold mb-2 block">Document language</Label>
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {LANGS.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {!useAi && (
+          <p className="text-xs text-muted-foreground mt-2">
+            On-device OCR will download a language model on first use (5–30&nbsp;MB depending on language).
+          </p>
+        )}
+      </div>
     </div>
   );
 
