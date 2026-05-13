@@ -71,12 +71,21 @@ export default function ComparePdf() {
         diff: diffC.toDataURL("image/png"),
         changed: Math.round((changed / (w * h)) * 1000) / 10,
       });
+      // Free per-page canvas memory before processing the next page
+      [left?.canvas, right?.canvas, L.c, R.c, diffC].forEach((cv) => {
+        if (cv) { cv.width = 0; cv.height = 0; }
+      });
     }
 
     if (!out.length) throw new Error("Could not render any pages from these PDFs.");
 
     return (
       <div className="space-y-6">
+        {maxPages > 25 && (
+          <div className="rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+            Showing the first 25 pages only — these PDFs have {maxPages} pages. For full comparison, split them first.
+          </div>
+        )}
         {out.map((r) => (
           <div key={r.idx} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-3">
