@@ -19,17 +19,26 @@ export default function UnlockPdf() {
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());
 
-    // Strategy 1: try pdf-lib direct re-save (works for many "owner-locked" PDFs)
+    // Detect if PDF is actually encrypted by trying pdfjs without password first
+    setStatus("Checking PDF…");
+    let isEncrypted = false;
     try {
-      const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-      const out = await PDFDocument.create();
-      const pages = await out.copyPages(doc, doc.getPageIndices());
-      pages.forEach((p) => out.addPage(p));
-      const data = await out.save();
-      downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
-      return;
-    } catch {
-      // fall through to pdfjs rasterization
+      await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+    } catch (e: any) {
+      if (e?.name === "PasswordException") isEncrypted = true;
+    }
+
+    // Strategy 1: not actually encrypted → just normalize/re-save and we're done
+    if (!isEncrypted) {
+      try {
+        const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        const out = await PDFDocument.create();
+        const pages = await out.copyPages(doc, doc.getPageIndices());
+        pages.forEach((p) => out.addPage(p));
+        const data = await out.save();
+        downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
+        return;
+      } catch {}
     }
 
     setStatus("Decrypting with password…");
