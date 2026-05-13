@@ -109,6 +109,7 @@ export default function OcrPdf() {
       setStatus("Running AI OCR (handwriting & multilingual)…");
       // Process in batches of 3 images per request to stay under payload limits
       const batchSize = 3;
+      let aiFellBack = false;
       for (let i = 0; i < pages.length; i += batchSize) {
         const slice = pages.slice(i, i + batchSize);
         const images = await Promise.all(slice.map((c) => canvasToBase64(c)));
@@ -116,10 +117,18 @@ export default function OcrPdf() {
           body: { images, language, mode: "structured" },
         });
         if (error) {
-          // Fall back to tesseract for this batch
+          // Fall back to tesseract for this batch (with chosen language)
           console.warn("AI OCR failed, falling back to local OCR:", error);
+          if (!aiFellBack) {
+            aiFellBack = true;
+            toast.warning("AI OCR unavailable — using on-device OCR instead.", {
+              description: "Results may be less accurate, especially for handwriting.",
+            });
+          }
+          const lang = tessLang(language);
           for (let j = 0; j < slice.length; j++) {
-            const r = await Tesseract.recognize(slice[j], "eng");
+            setStatus(`Local OCR — page ${i + j + 1} of ${pages.length}…`);
+            const r = await Tesseract.recognize(slice[j], lang);
             collected += `\n\n--- Page ${i + j + 1} ---\n${r.data.text}`;
           }
         } else {
@@ -128,9 +137,10 @@ export default function OcrPdf() {
         setProgress(25 + ((i + slice.length) / pages.length) * 70);
       }
     } else {
-      setStatus("Recognizing text locally…");
+      const lang = tessLang(language);
+      setStatus(`Recognizing text locally (${lang})…`);
       for (let i = 0; i < pages.length; i++) {
-        const { data } = await Tesseract.recognize(pages[i], "eng", {
+        const { data } = await Tesseract.recognize(pages[i], lang, {
           logger: (m) => {
             if (m.status === "recognizing text") {
               setProgress(25 + ((i + m.progress) / pages.length) * 70);
