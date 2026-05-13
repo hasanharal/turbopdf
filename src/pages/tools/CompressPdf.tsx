@@ -97,6 +97,9 @@ export default function CompressPdf() {
           </label>
         ))}
       </RadioGroup>
+      <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+        ⚠️ Note: pages are rasterized to images for maximum size reduction. Text in the output PDF will not be selectable, searchable or editable. For text-preserving compression, use a desktop tool.
+      </p>
     </div>
   );
 
