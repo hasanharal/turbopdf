@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
 import { downloadBlob, validatePdf } from "@/lib/file-utils";
