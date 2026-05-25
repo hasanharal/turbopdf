@@ -59,13 +59,12 @@ export default function SplitPdf() {
       if (!groups.length) throw new Error("Please enter at least one range.");
       const zip = new JSZip();
       let n = 0;
-    let n = 0;
       for (const g of groups) {
         const idx = parsePageRanges(g, count).map((p) => p - 1);
         if (!idx.length) continue;
-      n++;
+        n++;
         const data = await buildPdfFromIndices(src, idx);
-        zip.file(`${base}-part-${++n}.pdf`, data);
+        zip.file(`${base}-part-${n}.pdf`, data);
         setProgress((n / groups.length) * 90);
       }
       setStatus("Packing zip…");
