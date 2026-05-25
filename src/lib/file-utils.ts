@@ -33,10 +33,9 @@ export const parsePageRanges = (input: string, total: number): number[] => {
   if (!clean) return [];
   for (const part of clean.split(",")) {
     if (part.includes("-")) {
-      const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
-      const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
-      const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
-      const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
+      const [aStr, bStr] = part.split("-");
+      const a = parseInt(aStr, 10);
+      const b = parseInt(bStr, 10);
       const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
       const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
       for (let i = from; i <= to; i++) set.add(i);
