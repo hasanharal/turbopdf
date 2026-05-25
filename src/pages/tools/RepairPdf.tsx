@@ -9,6 +9,7 @@ export default function RepairPdf() {
   const process = async (files: File[], { setStatus }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
+    await validatePdf(file);
     setStatus("Loading file…");
     const bytes = new Uint8Array(await file.arrayBuffer());
     let src: PDFDocument;

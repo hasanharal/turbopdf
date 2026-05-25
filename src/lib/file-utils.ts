@@ -15,10 +15,11 @@ export const downloadBlob = (data: Uint8Array | Blob, filename: string, type = "
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 
 export const validatePdf = async (file: File) => {
+  if (file.size === 0) throw new Error("The selected file is empty.");
   if (!file) throw new Error("No file selected.");
   if (file.size > 200 * 1024 * 1024) throw new Error("File is larger than 200 MB.");
   const head = new Uint8Array(await file.slice(0, 5).arrayBuffer());
@@ -32,9 +33,12 @@ export const parsePageRanges = (input: string, total: number): number[] => {
   if (!clean) return [];
   for (const part of clean.split(",")) {
     if (part.includes("-")) {
-      const [a, b] = part.split("-").map(Number);
-      const from = Math.max(1, Math.min(a || 1, total));
-      const to = Math.max(from, Math.min(b || total, total));
+      const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
+      const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
+      const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
+      const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
+      const from = isFinite(a) ? Math.max(1, Math.min(a, total)) : 1;
+      const to = isFinite(b) ? Math.max(from, Math.min(b, total)) : total;
       for (let i = from; i <= to; i++) set.add(i);
     } else {
       const n = Number(part);
