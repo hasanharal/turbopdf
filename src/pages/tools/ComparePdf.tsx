@@ -35,6 +35,7 @@ export default function ComparePdf() {
     const p1 = await pdfjsLib.getDocument({ data: data1 }).promise;
     const p2 = await pdfjsLib.getDocument({ data: data2 }).promise;
     const maxPages = Math.max(p1.numPages, p2.numPages);
+    if (maxPages > 25) setStatus("Note: Only the first 25 pages will be compared.");
     const pages = Math.min(maxPages, 25);
     const out: DiffPage[] = [];
 

@@ -1,3 +1,4 @@
+import { formatBytes } from "./file-utils";
 import {
   FileArchive, FileStack, Scissors, FileText, FileType, Image as ImageIcon,
   ScanLine, Unlock, Lock, Droplets, RotateCw, Hash, Trash2, ArrowDownUp, PenTool, BookOpen,

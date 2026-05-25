@@ -23,7 +23,7 @@ export const Dropzone = ({ accept, multiple = false, files, onFiles, cta = "Drop
   );
 
   const acceptObj = accept.split(",").reduce((acc, mime) => {
-    acc[mime.trim()] = [];
+    const m = mime.trim(); const map: Record<string, string> = { ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation", ".html": "text/html" }; acc[map[m] || m] = [];
     return acc;
   }, {} as Record<string, string[]>);
 

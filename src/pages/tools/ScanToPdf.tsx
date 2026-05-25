@@ -72,6 +72,7 @@ export default function ScanToPdf() {
   const remove = (i: number) => setScans((s) => s.filter((_, idx) => idx !== i));
 
   const process = async () => {
+    try {
     if (!scans.length) throw new Error("Capture at least one page first.");
     const pdf = await PDFDocument.create();
     for (const s of scans) {
@@ -81,6 +82,7 @@ export default function ScanToPdf() {
       page.drawImage(img, { x: 0, y: 0, width: s.w, height: s.h });
     }
     downloadBlob(await pdf.save(), "scanned.pdf");
+    } finally { stop(); }
     stop();
   };
 
