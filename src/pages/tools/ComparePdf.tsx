@@ -80,39 +80,7 @@ export default function ComparePdf() {
 
     if (!out.length) throw new Error("Could not render any pages from these PDFs.");
 
-    return (
-      <div className="space-y-6">
-        {maxPages > 25 && (
-          <div className="rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-            Showing the first 25 pages only — these PDFs have {maxPages} pages. For full comparison, split them first.
-          </div>
-        )}
-        {out.map((r) => (
-          <div key={r.idx} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold">Page {r.idx}</h4>
-              <span className={`text-xs px-2 py-1 rounded-full ${r.changed > 0.1 ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
-                {r.changed}% changed
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Original</p>
-                <img src={r.left} className="w-full border border-border rounded-md" alt="A" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Modified</p>
-                <img src={r.right} className="w-full border border-border rounded-md" alt="B" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Differences</p>
-                <img src={r.diff} className="w-full border border-border rounded-md bg-white" alt="Diff" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return out;
   };
 
   const customBody = (
@@ -130,5 +98,37 @@ export default function ComparePdf() {
     </div>
   );
 
-  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone ctaLabel="Compare PDFs" />;
+  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone ctaLabel="Compare PDFs" renderResults={(results: DiffPage[]) => (
+    <div className="space-y-6">
+      {results.some((r) => r.idx > 25) && (
+        <div className="rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+          Showing the first 25 pages only. For full comparison, split them first.
+        </div>
+      )}
+      {results.map((r) => (
+        <div key={r.idx} className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold">Page {r.idx}</h4>
+            <span className={`text-xs px-2 py-1 rounded-full ${r.changed > 0.1 ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
+              {r.changed}% changed
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Original</p>
+              <img src={r.left} className="w-full border border-border rounded-md" alt="A" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Modified</p>
+              <img src={r.right} className="w-full border border-border rounded-md" alt="B" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Differences</p>
+              <img src={r.diff} className="w-full border border-border rounded-md bg-white" alt="Diff" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )} />;
 }

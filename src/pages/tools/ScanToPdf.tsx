@@ -73,17 +73,18 @@ export default function ScanToPdf() {
 
   const process = async () => {
     try {
-    if (!scans.length) throw new Error("Capture at least one page first.");
-    const pdf = await PDFDocument.create();
-    for (const s of scans) {
-      const bytes = Uint8Array.from(atob(s.dataUrl.split(",")[1]), (c) => c.charCodeAt(0));
-      const img = await pdf.embedJpg(bytes);
-      const page = pdf.addPage([s.w, s.h]);
-      page.drawImage(img, { x: 0, y: 0, width: s.w, height: s.h });
+      if (!scans.length) throw new Error("Capture at least one page first.");
+      const pdf = await PDFDocument.create();
+      for (const s of scans) {
+        const bytes = Uint8Array.from(atob(s.dataUrl.split(",")[1]), (c) => c.charCodeAt(0));
+        const img = await pdf.embedJpg(bytes);
+        const page = pdf.addPage([s.w, s.h]);
+        page.drawImage(img, { x: 0, y: 0, width: s.w, height: s.h });
+      }
+      downloadBlob(await pdf.save(), "scanned.pdf");
+    } finally {
+      stop();
     }
-    downloadBlob(await pdf.save(), "scanned.pdf");
-    } finally { stop(); }
-    stop();
   };
 
   const customBody = (
