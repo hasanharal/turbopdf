@@ -19,7 +19,7 @@ export default function ScanToPdf() {
 
   useEffect(() => () => stop(), []);
 
-  const start = async () => {
+  const start = async (files: File[], { setStatus, setProgress }: any) => {
     try {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
         throw new Error("Camera requires a secure (HTTPS) connection. Please open this page over HTTPS or on localhost.");
@@ -71,7 +71,7 @@ export default function ScanToPdf() {
 
   const remove = (i: number) => setScans((s) => s.filter((_, idx) => idx !== i));
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     try {
       if (!scans.length) throw new Error("Capture at least one page first.");
       const pdf = await PDFDocument.create();

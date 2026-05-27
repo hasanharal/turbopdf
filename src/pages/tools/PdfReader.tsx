@@ -22,7 +22,7 @@ export default function PdfReader() {
 
   useEffect(() => {
     const file = files[0]; if (!file) { setPdf(null); return; }
-    (async () => {
+    (async (files: File[], { setStatus, setProgress }: any) => {
       try {
         await validatePdf(file);
         const data = new Uint8Array(await file.arrayBuffer());
@@ -34,7 +34,7 @@ export default function PdfReader() {
 
   useEffect(() => {
     if (!pdf || !canvasRef.current) return;
-    (async () => {
+    (async (files: File[], { setStatus, setProgress }: any) => {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
       const c = canvasRef.current!;

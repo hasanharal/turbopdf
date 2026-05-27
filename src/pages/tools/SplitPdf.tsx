@@ -75,6 +75,7 @@ export default function SplitPdf() {
 
     // each = one PDF per page
     const zip = new JSZip();
+      let n = 0;
     for (let i = 0; i < count; i++) {
       const data = await buildPdfFromIndices(src, [i]);
       zip.file(`${base}-page-${i + 1}.pdf`, data);

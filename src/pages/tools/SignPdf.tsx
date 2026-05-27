@@ -31,7 +31,7 @@ export default function SignPdf() {
   useEffect(() => {
     let cancelled = false;
     if (!files[0]) { setPreview(null); setPageCount(1); return; }
-    (async () => {
+    (async (files: File[], { setStatus, setProgress }: any) => {
       const data = new Uint8Array(await files[0].arrayBuffer());
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       setPageCount(pdf.numPages);
@@ -72,7 +72,7 @@ export default function SignPdf() {
   const moveDrag = (e: React.PointerEvent) => { if (dragging.current) setFromEvent(e); };
   const endDrag = () => { dragging.current = false; };
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
     if (!signature) throw new Error("Please draw or upload your signature.");

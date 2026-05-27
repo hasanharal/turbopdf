@@ -15,7 +15,7 @@ export default function EditMetadata() {
 
   useEffect(() => {
     if (!files[0]) return;
-    (async () => {
+    (async (files: File[], { setStatus, setProgress }: any) => {
       try {
         const bytes = new Uint8Array(await files[0].arrayBuffer());
         const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
@@ -29,7 +29,7 @@ export default function EditMetadata() {
     })();
   }, [files]);
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);

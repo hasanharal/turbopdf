@@ -23,7 +23,7 @@ export default function CropPdf() {
   useEffect(() => {
     let cancelled = false;
     if (!files[0]) { setPreview(null); return; }
-    (async () => {
+    (async (files: File[], { setStatus, setProgress }: any) => {
       const data = new Uint8Array(await files[0].arrayBuffer());
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       const page = await pdf.getPage(1);
@@ -59,7 +59,7 @@ export default function CropPdf() {
   };
   const endMarquee = () => { dragStart.current = null; };
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);

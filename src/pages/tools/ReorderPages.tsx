@@ -46,7 +46,7 @@ export default function ReorderPages() {
     setOrder((prev) => arrayMove(prev, prev.indexOf(+active.id), prev.indexOf(+over.id)));
   };
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());

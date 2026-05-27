@@ -21,7 +21,7 @@ export default function DeletePages() {
     setRemoved(next);
   };
 
-  const process = async () => {
+  const process = async (files: File[], { setStatus, setProgress }: any) => {
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);
     if (removed.size === 0) throw new Error("Select at least one page to delete.");
