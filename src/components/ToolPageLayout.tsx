@@ -54,7 +54,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
       setDoneCount((n) => n + 1);
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || "Something went wrong. Please try a different file.");
+      setError(e?.message || "An unexpected error occurred. Please ensure your PDF is not password-protected and try again.");
       setState("error");
     }
   }, [files, hideDefaultDropzone, process]);
@@ -71,7 +71,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
   return (
     <div className="min-h-screen flex flex-col">
       <Seo
-        title={`${tool.name} — Free Online ${tool.name} Tool | TurboPDF`}
+        title={`${tool.name} | Professional Online PDF Tools | TurboPDF`}
         description={tool.description}
         canonical={`https://turbopdf.app/${tool.slug}`}
       />
@@ -179,7 +179,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
 
             <div className="mt-6 flex items-center gap-2.5 text-xs text-muted-foreground justify-center">
               <ShieldCheck className="h-4 w-4 text-success" />
-              Your files never leave your device — secure browser-side processing.
+              {tool.slug === "ocr-pdf" ? "Secure processing via AI gateway — your data is protected." : "Your files never leave your device — secure browser-side processing."}
             </div>
           </div>
         </section>

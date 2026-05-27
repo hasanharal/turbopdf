@@ -164,7 +164,7 @@ export default function OcrPdf() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold flex items-center gap-2">
-            {useAi && <Sparkles className="h-4 w-4 text-primary" />} Extracted text
+            {useAi && <Sparkles className="h-4 w-4 text-primary" />} Professional OCR Result
           </p>
           <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(collected); toast.success("Copied to clipboard"); }}>
             <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy

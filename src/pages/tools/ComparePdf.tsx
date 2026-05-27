@@ -102,7 +102,7 @@ export default function ComparePdf() {
     <div className="space-y-6">
       {results.some((r) => r.idx > 25) && (
         <div className="rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-          Showing the first 25 pages only. For full comparison, split them first.
+          ⚠️ Professional Limit: Showing first 25 pages only. For full comparison, split them first.
         </div>
       )}
       {results.map((r) => (
