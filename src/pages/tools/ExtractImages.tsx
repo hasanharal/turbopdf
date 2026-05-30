@@ -79,7 +79,7 @@ export default function ExtractImages() {
           <p className="text-sm font-medium">{collected.length} image{collected.length > 1 ? "s" : ""} extracted</p>
           <Button
             size="sm"
-            onClick={async (files: File[], { setStatus, setProgress }: any) => {
+            onClick={async () => {
               const zip = new JSZip();
               collected.forEach((img) => zip.file(img.name, img.blob));
               downloadBlob(await zip.generateAsync({ type: "blob" }), "extracted-images.zip", "application/zip");

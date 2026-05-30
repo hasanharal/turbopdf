@@ -29,7 +29,7 @@ export default function WatermarkPdf() {
   useEffect(() => {
     let cancelled = false;
     if (!files[0]) { setPreview(null); return; }
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    (async () => {
       const data = new Uint8Array(await files[0].arrayBuffer());
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       const page = await pdf.getPage(1);

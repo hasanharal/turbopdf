@@ -31,7 +31,13 @@ export default function HtmlToPdf() {
     wrapper.style.background = "#fff";
     wrapper.style.color = "#0f172a";
     wrapper.style.fontFamily = "Inter, system-ui, sans-serif";
-    wrapper.innerHTML = (baseHref ? `<base href="${baseHref}">` : "") + sourceHtml;
+    const iframe = document.createElement("iframe");
+    iframe.sandbox.add("allow-same-origin");
+    iframe.style.cssText = "position:fixed;top:-10000px;left:0;width:1024px;height:4000px";
+    document.body.appendChild(iframe);
+    iframe.contentDocument!.open();
+    iframe.contentDocument!.write(sourceHtml);
+    iframe.contentDocument!.close();
     document.body.appendChild(wrapper);
     try {
       // Wait for images to load (best-effort)

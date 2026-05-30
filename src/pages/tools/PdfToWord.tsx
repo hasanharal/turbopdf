@@ -36,6 +36,9 @@ const buildDocx = async (text: string): Promise<Uint8Array> => {
 export default function PdfToWord() {
   const process = async (files: File[]) => {
     const file = files[0];
+    if (!file) throw new Error("Please upload a PDF.");
+    await validatePdf(file);
+    const file = files[0];
     const buf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
     let fullText = "";

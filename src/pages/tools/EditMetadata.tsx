@@ -15,7 +15,7 @@ export default function EditMetadata() {
 
   useEffect(() => {
     if (!files[0]) return;
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    (async () => {
       try {
         const bytes = new Uint8Array(await files[0].arrayBuffer());
         const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });

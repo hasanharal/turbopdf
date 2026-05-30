@@ -23,7 +23,7 @@ export default function CropPdf() {
   useEffect(() => {
     let cancelled = false;
     if (!files[0]) { setPreview(null); return; }
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    (async () => {
       const data = new Uint8Array(await files[0].arrayBuffer());
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       const page = await pdf.getPage(1);
@@ -74,6 +74,7 @@ export default function CropPdf() {
       const w = width - lx - rx;
       const h = height - ty - by;
       if (w > 10 && h > 10) p.setCropBox(lx, by, w, h);
+      p.setMediaBox(lx, by, w, h);
     }
     downloadBlob(await doc.save(), file.name.replace(/\.pdf$/i, "") + "-cropped.pdf");
   };

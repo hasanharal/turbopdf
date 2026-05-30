@@ -1,6 +1,6 @@
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
-import { downloadBlob, formatBytes } from "@/lib/file-utils";
+import { downloadBlob, formatBytes, validatePdf } from "@/lib/file-utils";
 import { PDFDocument } from "pdf-lib";
 
 const tool = getTool("repair-pdf");

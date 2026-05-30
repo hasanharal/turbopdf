@@ -24,6 +24,7 @@ type Props = {
   options?: (files: File[]) => ReactNode;
   helper?: ReactNode;
   ctaLabel?: string;
+  renderResults?: (data: any) => React.ReactNode;
   hideDefaultDropzone?: boolean;
   customBody?: ReactNode;
 };
@@ -143,6 +144,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
               )}
 
               {state === "success" && (
+            {renderResults && renderResults(result)}
                 <div className="mt-5 animate-fade-in space-y-4">
                   <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
                     <CheckCircle2 className="h-5 w-5 text-success shrink-0" />

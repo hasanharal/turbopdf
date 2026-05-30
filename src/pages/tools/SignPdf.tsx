@@ -31,7 +31,7 @@ export default function SignPdf() {
   useEffect(() => {
     let cancelled = false;
     if (!files[0]) { setPreview(null); setPageCount(1); return; }
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    (async () => {
       const data = new Uint8Array(await files[0].arrayBuffer());
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       setPageCount(pdf.numPages);

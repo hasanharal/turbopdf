@@ -24,6 +24,7 @@ export const usePdfThumbs = (file: File | undefined) => {
           ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
           await page.render({ canvasContext: ctx, viewport, canvas: c } as any).promise;
           out.push(c.toDataURL("image/jpeg", 0.7));
+        c.width = 0; c.height = 0;
           if (cancelled) return;
         }
         if (!cancelled) setThumbs(out);

@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 const tool = getTool("ocr-pdf");
 
 const LANGS: { value: string; label: string; tess: string }[] = [
-  { value: "auto", label: "Auto-detect (multilingual)", tess: "eng" },
+  { value: "auto", label: "Auto-detect (multilingual)", tess: "osd+eng" },
   { value: "English", label: "English", tess: "eng" },
   { value: "Urdu", label: "Urdu", tess: "urd" },
   { value: "Arabic", label: "Arabic", tess: "ara" },

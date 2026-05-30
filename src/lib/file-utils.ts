@@ -15,7 +15,7 @@ export const downloadBlob = (data: Uint8Array | Blob, filename: string, type = "
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
 };
 
 export const validatePdf = async (file: File) => {

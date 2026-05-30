@@ -19,7 +19,7 @@ export default function ScanToPdf() {
 
   useEffect(() => () => stop(), []);
 
-  const start = async (files: File[], { setStatus, setProgress }: any) => {
+  const start = async () => {
     try {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
         throw new Error("Camera requires a secure (HTTPS) connection. Please open this page over HTTPS or on localhost.");

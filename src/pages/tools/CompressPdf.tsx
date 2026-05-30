@@ -68,7 +68,7 @@ export default function CompressPdf() {
     const reduction = Math.max(0, ((original - finalSize) / original) * 100);
 
     const name = file.name.replace(/\.pdf$/i, "") + "-compressed.pdf";
-    downloadBlob(compressed, name);
+    if (finalSize < original) downloadBlob(compressed, name);
 
     if (finalSize > original) return <div className="text-destructive text-sm font-medium">Warning: Compression increased the file size. The original file may already be optimized.</div>;
     return (

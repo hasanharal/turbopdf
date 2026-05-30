@@ -54,7 +54,12 @@ export default function ExcelToPdf() {
           pdf.setDrawColor(220);
           pdf.rect(x, y - rowH + 4, colW, rowH);
           const txt = String(row[c] ?? "");
-          const lines = pdf.splitTextToSize(txt, colW - 6);
+          const lines = pdf.splitTextToSize(String(row[c] ?? ""), colW - 6);
+        const effectiveRowH = Math.max(rowH, lines.length * 12 + 4);
+        pdf.rect(x, y - rowH + 4, colW, effectiveRowH);
+        lines.forEach((line: string, li: number) => {
+          pdf.text(line, x + 4, y - 2 + li * 12);
+        });
           pdf.text(lines[0] || "", x + 4, y - 2);
         }
         y += rowH;
