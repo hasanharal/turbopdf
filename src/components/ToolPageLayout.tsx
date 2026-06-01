@@ -20,7 +20,7 @@ export type ProcessCtx = {
 
 type Props = {
   tool: Tool;
-  process: (files: File[], ctx: ProcessCtx) => Promise<ReactNode | void>;
+  process: (files: File[], ctx: ProcessCtx) => Promise<any>;
   options?: (files: File[]) => ReactNode;
   helper?: ReactNode;
   ctaLabel?: string;
@@ -29,7 +29,7 @@ type Props = {
   customBody?: ReactNode;
 };
 
-export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideDefaultDropzone, customBody }: Props) => {
+export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideDefaultDropzone, customBody, renderResults }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState("");
