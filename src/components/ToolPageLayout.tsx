@@ -35,7 +35,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
-  const [result, setResult] = useState<ReactNode>(null);
+  const [result, setResult] = useState<any>(null);
   const [doneCount, setDoneCount] = useState(0);
   const Icon = tool.icon;
 
