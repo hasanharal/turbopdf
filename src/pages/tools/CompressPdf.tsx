@@ -49,8 +49,12 @@ export default function CompressPdf() {
 
       await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
 
-      const blob: Blob = await new Promise((res) =>
-        canvas.toBlob((b) => res(b!), "image/jpeg", settings.quality)!
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob(
+          (b) => (b ? res(b) : rej(new Error(`Failed to export page ${i}. Your browser may have run out of memory.`))),
+          "image/jpeg",
+          settings.quality,
+        ),
       );
       const bytes = new Uint8Array(await blob.arrayBuffer());
       const jpg = await out.embedJpg(bytes);

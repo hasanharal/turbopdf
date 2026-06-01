@@ -14,11 +14,18 @@ export default function EditMetadata() {
   const [meta, setMeta] = useState({ title: "", author: "", subject: "", keywords: "" });
 
   useEffect(() => {
-    if (!files[0]) return;
+    if (!files[0]) {
+      setMeta({ title: "", author: "", subject: "", keywords: "" });
+      return;
+    }
+    let cancelled = false;
+    // Reset immediately so stale metadata from the previous file is never shown/saved.
+    setMeta({ title: "", author: "", subject: "", keywords: "" });
     (async () => {
       try {
         const bytes = new Uint8Array(await files[0].arrayBuffer());
         const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        if (cancelled) return;
         setMeta({
           title: doc.getTitle() || "",
           author: doc.getAuthor() || "",
@@ -27,6 +34,7 @@ export default function EditMetadata() {
         });
       } catch {}
     })();
+    return () => { cancelled = true; };
   }, [files]);
 
   const process = async (files: File[], { setStatus, setProgress }: any) => {

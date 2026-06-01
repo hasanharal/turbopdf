@@ -45,17 +45,21 @@ function preprocess(canvas: HTMLCanvasElement) {
   ctx.putImageData(img, 0, 0);
 }
 
+// Chunked, non-O(n^2) base64 encoder using FileReader (avoids large string concat).
 async function canvasToBase64(c: HTMLCanvasElement, quality = 0.85): Promise<string> {
-  return new Promise((resolve) => {
-    c.toBlob(async (blob) => {
-      const buf = await blob!.arrayBuffer();
-      let bin = "";
-      const bytes = new Uint8Array(buf);
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      resolve(`data:image/jpeg;base64,${btoa(bin)}`);
-    }, "image/jpeg", quality);
+  const blob: Blob = await new Promise((resolve, reject) => {
+    c.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed"))), "image/jpeg", quality);
+  });
+  return new Promise<string>((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result as string);
+    fr.onerror = () => reject(fr.error || new Error("Read failed"));
+    fr.readAsDataURL(blob);
   });
 }
+
+// Rough payload size guard. base64 ~= bytes * 4/3.
+const approxBase64Bytes = (dataUrl: string) => dataUrl.length;
 
 export default function OcrPdf() {
   const [text, setText] = useState("");
@@ -110,9 +114,29 @@ export default function OcrPdf() {
       // Process in batches of 3 images per request to stay under payload limits
       const batchSize = 3;
       let aiFellBack = false;
+      const MAX_PAYLOAD = 4 * 1024 * 1024; // ~4 MB safety limit
       for (let i = 0; i < pages.length; i += batchSize) {
-        const slice = pages.slice(i, i + batchSize);
-        const images = await Promise.all(slice.map((c) => canvasToBase64(c)));
+        let slice = pages.slice(i, i + batchSize);
+        let images = await Promise.all(slice.map((c) => canvasToBase64(c, 0.8)));
+        let totalBytes = images.reduce((s, im) => s + approxBase64Bytes(im), 0);
+        if (totalBytes > MAX_PAYLOAD) {
+          // Re-encode at lower quality, then fall back to one-per-request if still too big.
+          images = await Promise.all(slice.map((c) => canvasToBase64(c, 0.6)));
+          totalBytes = images.reduce((s, im) => s + approxBase64Bytes(im), 0);
+          if (totalBytes > MAX_PAYLOAD) {
+            toast.message(`Large pages — sending one at a time (~${Math.round(totalBytes / 1024)} KB).`);
+            for (let k = 0; k < slice.length; k++) {
+              const single = [images[k]];
+              const { data, error } = await supabase.functions.invoke("ai-ocr", {
+                body: { images: single, language, mode: "structured" },
+              });
+              if (error) throw error;
+              collected += `\n\n${data?.text || ""}`;
+              setProgress(25 + ((i + k + 1) / pages.length) * 70);
+            }
+            continue;
+          }
+        }
         const { data, error } = await supabase.functions.invoke("ai-ocr", {
           body: { images, language, mode: "structured" },
         });

@@ -9,9 +9,17 @@ export default function RepairPdf() {
   const process = async (files: File[], { setStatus }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
-    await validatePdf(file);
+    // Skip strict validatePdf — this tool exists to repair files that wouldn't pass it.
+    // We only check a couple of basics so we can give a helpful error.
+    if (file.size === 0) throw new Error("The selected file is empty.");
+    if (file.size > 200 * 1024 * 1024) throw new Error("File is larger than 200 MB.");
     setStatus("Loading file…");
     const bytes = new Uint8Array(await file.arrayBuffer());
+    // Try to find the PDF header anywhere in the first 1 KB (handles files with junk prefix).
+    const headStr = new TextDecoder("latin1").decode(bytes.slice(0, 1024));
+    if (!/%PDF-/.test(headStr)) {
+      throw new Error("This file does not contain any recognizable PDF data and cannot be repaired.");
+    }
     let src: PDFDocument;
     try {
       src = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false });

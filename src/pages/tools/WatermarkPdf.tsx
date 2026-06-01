@@ -100,16 +100,18 @@ export default function WatermarkPdf() {
               onPointerCancel={endDrag}
             >
               <img src={preview} alt="Preview" draggable={false} className="block max-w-full max-h-[500px] rounded-md border border-border bg-white pointer-events-none" />
+              {/* Preview is rendered at scale 1.1 of PDF points; scale font size to match. */}
               <span
                 className="absolute pointer-events-none whitespace-nowrap font-extrabold"
                 style={{
                   left: `${posX}%`,
                   top: `${posY}%`,
                   transform: `translate(-50%, -50%) rotate(${diagonal ? -45 : 0}deg)`,
-                  fontSize: `${size * 0.95}px`,
+                  fontSize: `${size * 1.1}px`,
                   color: "rgba(80,80,80,1)",
                   opacity: opacity / 100,
-                  fontFamily: "Arial Black, Helvetica, sans-serif",
+                  fontFamily: "Helvetica, Arial, sans-serif",
+                  fontWeight: 700,
                 }}
               >
                 {text || " "}
