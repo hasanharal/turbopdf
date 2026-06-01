@@ -21,7 +21,7 @@ export default function HtmlToPdf() {
   const [html, setHtml] = useState("<h1>Hello TurboPDF</h1>\n<p>Paste any HTML here and it will be converted into a clean PDF.</p>");
   const [url, setUrl] = useState("");
 
-  const renderHtmlToPdf = async (sourceHtml: string, baseHref?: string) => {
+  const renderHtmlToPdf = async (sourceHtml: string, _baseHref?: string) => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "fixed";
     wrapper.style.top = "-10000px";
@@ -31,13 +31,7 @@ export default function HtmlToPdf() {
     wrapper.style.background = "#fff";
     wrapper.style.color = "#0f172a";
     wrapper.style.fontFamily = "Inter, system-ui, sans-serif";
-    const iframe = document.createElement("iframe");
-    iframe.sandbox.add("allow-same-origin");
-    iframe.style.cssText = "position:fixed;top:-10000px;left:0;width:1024px;height:4000px";
-    document.body.appendChild(iframe);
-    iframe.contentDocument!.open();
-    iframe.contentDocument!.write(sourceHtml);
-    iframe.contentDocument!.close();
+    wrapper.innerHTML = sourceHtml;
     document.body.appendChild(wrapper);
     try {
       // Wait for images to load (best-effort)
@@ -52,9 +46,10 @@ export default function HtmlToPdf() {
       const imgH = (canvas.height * imgW) / canvas.width;
 
       const totalPages = Math.ceil(imgH / pageH);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
       for (let i = 0; i < totalPages; i++) {
         if (i > 0) pdf.addPage();
-        pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, -i * pageH, imgW, imgH);
+        pdf.addImage(dataUrl, "JPEG", 0, -i * pageH, imgW, imgH);
       }
       return pdf.output("blob");
     } finally {

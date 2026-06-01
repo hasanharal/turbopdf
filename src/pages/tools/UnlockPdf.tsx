@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
 import { downloadBlob, validatePdf } from "@/lib/file-utils";
+import { PDFDocument as CantooPDFDocument } from "@cantoo/pdf-lib";
 import { PDFDocument } from "pdf-lib";
 import { pdfjsLib } from "@/lib/pdf-worker";
 import { Input } from "@/components/ui/input";
@@ -13,13 +14,13 @@ const tool = getTool("unlock-pdf");
 export default function UnlockPdf() {
   const [password, setPassword] = useState("");
 
-  const process = async (files: File[], { setStatus, setProgress }: any) => {
+  const process = async (files: File[], { setStatus }: any) => {
     const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());
 
-    // Detect if PDF is actually encrypted by trying pdfjs without password first
+    // Detect encryption via pdfjs
     setStatus("Checking PDF…");
     let isEncrypted = false;
     try {
@@ -28,45 +29,33 @@ export default function UnlockPdf() {
       if (e?.name === "PasswordException") isEncrypted = true;
     }
 
-    // Strategy 1: not actually encrypted → just normalize/re-save and we're done
+    // Not actually encrypted: just normalize and return
     if (!isEncrypted) {
-      try {
-        const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-        const out = await PDFDocument.create();
-        const pages = await out.copyPages(doc, doc.getPageIndices());
-        pages.forEach((p) => out.addPage(p));
-        const data = await out.save();
-        downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
-        return;
-      } catch {}
+      const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const out = await PDFDocument.create();
+      const pages = await out.copyPages(doc, doc.getPageIndices());
+      pages.forEach((p) => out.addPage(p));
+      const data = await out.save();
+      downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
+      return;
     }
 
-    setStatus("Decrypting with password…");
-    let pdf;
+    if (!password) throw new Error("This PDF is encrypted. Please enter the password.");
+
+    // Use @cantoo/pdf-lib which supports password decryption while preserving text
+    setStatus("Decrypting…");
+    let srcDoc: any;
     try {
-      pdf = await pdfjsLib.getDocument({ data: bytes, password: password || undefined }).promise;
+      srcDoc = await (CantooPDFDocument as any).load(bytes, { password });
     } catch (e: any) {
-      if (e?.name === "PasswordException") throw new Error("Incorrect or missing password.");
-      throw new Error("Could not open this PDF. It may use unsupported encryption.");
+      throw new Error("Incorrect password or unsupported encryption method.");
     }
 
-    const out = await PDFDocument.create();
-    for (let i = 1; i <= pdf.numPages; i++) {
-      setStatus(`Rebuilding page ${i} of ${pdf.numPages}…`);
-      setProgress((i / pdf.numPages) * 90);
-      const page = await pdf.getPage(i);
-      const vp = page.getViewport({ scale: 2 });
-      const c = document.createElement("canvas");
-      c.width = vp.width; c.height = vp.height;
-      const ctx = c.getContext("2d")!;
-      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-      await page.render({ canvasContext: ctx, viewport: vp, canvas: c } as any).promise;
-      const jpg = c.toDataURL("image/jpeg", 0.92);
-      const img = await out.embedJpg(Uint8Array.from(atob(jpg.split(",")[1]), (ch) => ch.charCodeAt(0)));
-      const newPage = out.addPage([vp.width, vp.height]);
-      newPage.drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
-    }
-    const data = await out.save();
+    setStatus("Rebuilding PDF without password…");
+    const out: any = await (CantooPDFDocument as any).create();
+    const pages = await out.copyPages(srcDoc, srcDoc.getPageIndices());
+    pages.forEach((p: any) => out.addPage(p));
+    const data: Uint8Array = await out.save();
     downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
   };
 
@@ -74,7 +63,7 @@ export default function UnlockPdf() {
     <div className="space-y-2">
       <Label>Password (required for encrypted PDFs)</Label>
       <Input type="password" placeholder="Enter PDF password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <p className="text-xs text-muted-foreground">Owner-locked PDFs unlock instantly. Strongly encrypted PDFs are decrypted using your password.</p>
+      <p className="text-xs text-muted-foreground">Text remains selectable and searchable after unlocking.</p>
     </div>
   );
 

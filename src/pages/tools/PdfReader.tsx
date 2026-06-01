@@ -22,27 +22,35 @@ export default function PdfReader() {
 
   useEffect(() => {
     const file = files[0]; if (!file) { setPdf(null); return; }
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    let cancelled = false;
+    (async () => {
       try {
         await validatePdf(file);
         const data = new Uint8Array(await file.arrayBuffer());
         const doc = await pdfjsLib.getDocument({ data }).promise;
+        if (cancelled) return;
         setPdf(doc); setPageNum(1); setError("");
-      } catch (e: any) { setError(e?.message || "Could not open file"); }
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Could not open file");
+      }
     })();
+    return () => { cancelled = true; };
   }, [files]);
 
   useEffect(() => {
     if (!pdf || !canvasRef.current) return;
-    (async (files: File[], { setStatus, setProgress }: any) => {
+    let cancelled = false;
+    (async () => {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
-      const c = canvasRef.current!;
+      const c = canvasRef.current;
+      if (!c || cancelled) return;
       c.width = viewport.width; c.height = viewport.height;
       const ctx = c.getContext("2d")!;
       ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
       await page.render({ canvasContext: ctx, viewport, canvas: c } as any).promise;
     })();
+    return () => { cancelled = true; };
   }, [pdf, pageNum, scale]);
 
   return (

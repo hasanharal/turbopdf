@@ -21,6 +21,9 @@ export default function PageNumbers() {
     const doc = await PDFDocument.load(bytes);
     const font = await doc.embedFont(StandardFonts.Helvetica);
     const total = doc.getPageCount();
+    if (start > total) {
+      throw new Error(`"Start at" (${start}) is larger than the document's ${total} page${total === 1 ? "" : "s"}. Please choose a value between 1 and ${total}.`);
+    }
 
     doc.getPages().forEach((page, i) => {
       const n = i + start;

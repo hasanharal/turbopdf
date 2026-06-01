@@ -20,7 +20,7 @@ export type ProcessCtx = {
 
 type Props = {
   tool: Tool;
-  process: (files: File[], ctx: ProcessCtx) => Promise<ReactNode | void>;
+  process: (files: File[], ctx: ProcessCtx) => Promise<any>;
   options?: (files: File[]) => ReactNode;
   helper?: ReactNode;
   ctaLabel?: string;
@@ -29,13 +29,13 @@ type Props = {
   customBody?: ReactNode;
 };
 
-export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideDefaultDropzone, customBody }: Props) => {
+export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideDefaultDropzone, customBody, renderResults }: Props) => {
   const [files, setFiles] = useState<File[]>([]);
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
-  const [result, setResult] = useState<ReactNode>(null);
+  const [result, setResult] = useState<any>(null);
   const [doneCount, setDoneCount] = useState(0);
   const Icon = tool.icon;
 
@@ -150,7 +150,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
                     <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
                     <p className="text-sm font-medium text-foreground">Done! Your file has been downloaded.</p>
                   </div>
-                  {result}
+                  {!renderResults && result}
                 </div>
               )}
 

@@ -9,6 +9,15 @@ const tool = getTool("word-to-pdf")!;
 export default function WordToPdf() {
   const process = async (files: File[]) => {
     const file = files[0];
+    if (!file) throw new Error("Please upload a Word document.");
+    if (!/\.docx$/i.test(file.name)) {
+      throw new Error("Only .docx files are supported. Please save your document as .docx and try again.");
+    }
+    // Verify it really is a docx (zip) by checking magic bytes "PK".
+    const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+    if (head[0] !== 0x50 || head[1] !== 0x4b) {
+      throw new Error("This file does not look like a valid .docx document.");
+    }
     const arrayBuffer = await file.arrayBuffer();
     const { value: text } = await mammoth.extractRawText({ arrayBuffer });
 

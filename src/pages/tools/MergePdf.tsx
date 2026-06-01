@@ -28,6 +28,7 @@ export default function MergePdf() {
       setProgress(((i + 1) / files.length) * 95);
     }
     const out = await merged.save();
+    setProgress(100);
     downloadBlob(out, "merged.pdf");
   };
 

@@ -52,14 +52,9 @@ export default function ExcelToPdf() {
         for (let c = 0; c < cols; c++) {
           const x = margin + c * colW;
           pdf.setDrawColor(220);
-          pdf.rect(x, y - rowH + 4, colW, rowH);
           const txt = String(row[c] ?? "");
-          const lines = pdf.splitTextToSize(String(row[c] ?? ""), colW - 6);
-        const effectiveRowH = Math.max(rowH, lines.length * 12 + 4);
-        pdf.rect(x, y - rowH + 4, colW, effectiveRowH);
-        lines.forEach((line: string, li: number) => {
-          pdf.text(line, x + 4, y - 2 + li * 12);
-        });
+          const lines = pdf.splitTextToSize(txt, colW - 6);
+          pdf.rect(x, y - rowH + 4, colW, rowH);
           pdf.text(lines[0] || "", x + 4, y - 2);
         }
         y += rowH;

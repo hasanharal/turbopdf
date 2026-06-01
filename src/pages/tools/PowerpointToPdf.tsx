@@ -6,12 +6,22 @@ import JSZip from "jszip";
 
 const tool = getTool("powerpoint-to-pdf");
 
+const decodeXml = (s: string) =>
+  s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&amp;/g, "&");
+
 const extractText = (xml: string): string[] => {
   const out: string[] = [];
   const re = /<a:t[^>]*>([^<]*)<\/a:t>/g;
   let m;
   while ((m = re.exec(xml)) !== null) {
-    const t = m[1].trim();
+    const t = decodeXml(m[1]).trim();
     if (t) out.push(t);
   }
   return out;

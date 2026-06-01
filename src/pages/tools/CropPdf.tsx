@@ -74,7 +74,6 @@ export default function CropPdf() {
       const w = width - lx - rx;
       const h = height - ty - by;
       if (w > 10 && h > 10) p.setCropBox(lx, by, w, h);
-      p.setMediaBox(lx, by, w, h);
     }
     downloadBlob(await doc.save(), file.name.replace(/\.pdf$/i, "") + "-cropped.pdf");
   };

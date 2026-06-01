@@ -89,8 +89,9 @@ export default function SignPdf() {
     const h = (png.height / png.width) * w;
     const cx = (posX / 100) * width;
     const cy = (posY / 100) * height;
-    const x = cx - w / 2;
-    const y = height - cy - h / 2;
+    // Clamp inside page bounds so the signature is never partly off-page.
+    const x = Math.max(0, Math.min(width - w, cx - w / 2));
+    const y = Math.max(0, Math.min(height - h, height - cy - h / 2));
     p.drawImage(png, { x, y, width: w, height: h });
     downloadBlob(await doc.save(), file.name.replace(/\.pdf$/i, "") + "-signed.pdf");
   };

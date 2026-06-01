@@ -35,9 +35,10 @@ export default function ComparePdf() {
     const p1 = await pdfjsLib.getDocument({ data: data1 }).promise;
     const p2 = await pdfjsLib.getDocument({ data: data2 }).promise;
     const maxPages = Math.max(p1.numPages, p2.numPages);
-    if (maxPages > 25) setStatus("Note: Only the first 25 pages will be compared.");
     const pages = Math.min(maxPages, 25);
     const out: DiffPage[] = [];
+    const truncated = maxPages > 25;
+    if (truncated) setStatus("Note: Only the first 25 pages will be compared.");
 
     for (let i = 1; i <= pages; i++) {
       setStatus(`Comparing page ${i} of ${pages}…`);
@@ -80,7 +81,7 @@ export default function ComparePdf() {
 
     if (!out.length) throw new Error("Could not render any pages from these PDFs.");
 
-    return out;
+    return { pages: out, truncated, total: maxPages };
   };
 
   const customBody = (
@@ -98,14 +99,14 @@ export default function ComparePdf() {
     </div>
   );
 
-  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone ctaLabel="Compare PDFs" renderResults={(results: DiffPage[]) => (
+  return <ToolPageLayout tool={tool} process={process} customBody={customBody} hideDefaultDropzone ctaLabel="Compare PDFs" renderResults={(results: { pages: DiffPage[]; truncated: boolean; total: number }) => (
     <div className="space-y-6">
-      {results.some((r) => r.idx > 25) && (
+      {results.truncated && (
         <div className="rounded-lg border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-          ⚠️ Professional Limit: Showing first 25 pages only. For full comparison, split them first.
+          ⚠️ Showing first 25 of {results.total} pages. For full comparison, split the PDFs first.
         </div>
       )}
-      {results.map((r) => (
+      {results.pages.map((r) => (
         <div key={r.idx} className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold">Page {r.idx}</h4>
