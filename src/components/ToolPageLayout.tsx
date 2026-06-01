@@ -150,7 +150,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
                     <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
                     <p className="text-sm font-medium text-foreground">Done! Your file has been downloaded.</p>
                   </div>
-                  {result}
+                  {!renderResults && result}
                 </div>
               )}
 
