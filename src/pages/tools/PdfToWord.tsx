@@ -1,6 +1,6 @@
 import { ToolPageLayout } from "@/components/ToolPageLayout";
 import { getTool } from "@/lib/tools";
-import { downloadBlob } from "@/lib/file-utils";
+import { downloadBlob, validatePdf } from "@/lib/file-utils";
 import { pdfjsLib } from "@/lib/pdf-worker";
 
 const tool = getTool("pdf-to-word")!;
@@ -35,6 +35,7 @@ const buildDocx = async (text: string): Promise<Uint8Array> => {
 
 export default function PdfToWord() {
   const process = async (files: File[]) => {
+    const file = files[0];
     if (!file) throw new Error("Please upload a PDF.");
     await validatePdf(file);
     const buf = await file.arrayBuffer();
