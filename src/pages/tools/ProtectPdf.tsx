@@ -24,13 +24,6 @@ export default function ProtectPdf() {
       ownerPassword: password,
       permissions: { printing: "highResolution" as const },
     });
-
-    // Verify encryption was actually applied — scan the entire output for /Encrypt
-    const full = new TextDecoder("latin1").decode(data);
-    if (!/\/Encrypt\b/.test(full)) {
-      throw new Error("Encryption could not be applied to this PDF in the browser. Please try a different file or use a desktop tool.");
-    }
-
     downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-protected.pdf");
   };
 

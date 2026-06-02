@@ -26,7 +26,7 @@ export default function ComparePdf() {
   };
 
   const process = async (_: File[], { setStatus, setProgress }: any) => {
-    if (!a[0] || !b[0]) throw new Error("Please upload two PDFs to compare.");
+    if (!a[0] || !b[0]) throw new Error("Please upload both PDFs to compare.");
     await validatePdf(a[0]); await validatePdf(b[0]);
 
     setStatus("Loading PDFs…");

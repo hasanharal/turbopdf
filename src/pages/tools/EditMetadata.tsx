@@ -37,9 +37,9 @@ export default function EditMetadata() {
     return () => { cancelled = true; };
   }, [files]);
 
-  const process = async (files: File[], { setStatus, setProgress }: any) => {
+  const process = async (_: File[]) => {
     const file = files[0];
-    if (!file) throw new Error("Please upload a PDF.");
+    if (!file) throw new Error("Please upload a PDF first.");
     await validatePdf(file);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });

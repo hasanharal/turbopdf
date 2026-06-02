@@ -72,7 +72,7 @@ export default function HtmlToPdf() {
     throw new Error("This site blocks cross-origin access. Please use 'Paste HTML' instead — open the page, View Source, copy and paste the HTML here.");
   };
 
-  const process = async (_: File[], { setStatus }: any) => {
+  const process = async (_files: File[], { setStatus }: any) => {
     if (tab === "html") {
       if (!html.trim()) throw new Error("Please enter some HTML.");
       setStatus("Rendering HTML…");
