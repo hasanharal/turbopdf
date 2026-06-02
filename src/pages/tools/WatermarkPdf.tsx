@@ -54,9 +54,9 @@ export default function WatermarkPdf() {
   const moveDrag = (e: React.PointerEvent) => { if (dragging.current) setFromEvent(e); };
   const endDrag = () => { dragging.current = false; };
 
-  const process = async (files: File[], { setStatus, setProgress }: any) => {
+  const process = async (_: File[]) => {
     const file = files[0];
-    if (!file) throw new Error("Please upload a PDF.");
+    if (!file) throw new Error("Please upload a PDF first.");
     await validatePdf(file);
     if (!text.trim()) throw new Error("Watermark text cannot be empty.");
     const bytes = new Uint8Array(await file.arrayBuffer());
