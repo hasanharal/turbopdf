@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download, ShieldCheck, Sparkles } from "lucide-react";
-import { useState, ReactNode, useCallback } from "react";
+import { ChevronLeft, Loader2, CheckCircle2, AlertCircle, Download, ShieldCheck, Sparkles, FileDown } from "lucide-react";
+import { useState, ReactNode, useCallback, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Dropzone } from "@/components/Dropzone";
@@ -10,6 +10,7 @@ import { Seo } from "@/components/Seo";
 import { Tool } from "@/lib/tools";
 import { PostTaskPrompt } from "@/components/feedback/PostTaskPrompt";
 import { motion, AnimatePresence } from "framer-motion";
+import { DOWNLOAD_EVENT, DownloadEntry, formatBytes } from "@/lib/file-utils";
 
 type State = "idle" | "processing" | "success" | "error";
 
@@ -37,7 +38,19 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
   const [status, setStatus] = useState("");
   const [result, setResult] = useState<any>(null);
   const [doneCount, setDoneCount] = useState(0);
+  const [downloads, setDownloads] = useState<DownloadEntry[]>([]);
   const Icon = tool.icon;
+
+  // Capture any blobs downloaded during the current processing run, so users can re-download them.
+  useEffect(() => {
+    const onDownload = (e: Event) => {
+      const detail = (e as CustomEvent<DownloadEntry>).detail;
+      if (!detail) return;
+      setDownloads((d) => [...d, detail]);
+    };
+    window.addEventListener(DOWNLOAD_EVENT, onDownload as EventListener);
+    return () => window.removeEventListener(DOWNLOAD_EVENT, onDownload as EventListener);
+  }, []);
 
   const run = useCallback(async () => {
     if (!files.length && !hideDefaultDropzone) return;
@@ -46,6 +59,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
     setProgress(0);
     setStatus("Preparing your file…");
     setResult(null);
+    setDownloads([]);
     try {
       const r = await process(files, { setProgress, setStatus });
       setProgress(100);
@@ -67,6 +81,18 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
     setProgress(0);
     setStatus("");
     setResult(null);
+    setDownloads([]);
+  };
+
+  const redownload = (entry: DownloadEntry) => {
+    const url = URL.createObjectURL(entry.blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = entry.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    requestAnimationFrame(() => URL.revokeObjectURL(url));
   };
 
   return (
@@ -127,11 +153,6 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
                       <span className="text-xs font-mono text-muted-foreground tabular-nums">{Math.round(progress)}%</span>
                     </div>
                     <Progress value={progress} className="mt-3 h-1.5" />
-                    <div className="mt-3 grid grid-cols-3 gap-2">
-                      {[0,1,2].map((i) => (
-                        <div key={i} className="h-1 rounded-full bg-gradient-to-r from-transparent via-primary/40 to-transparent bg-[length:200%_100%] animate-shimmer" style={{ animationDelay: `${i * 200}ms` }} />
-                      ))}
-                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -148,8 +169,29 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
                   {renderResults && renderResults(result)}
                   <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
                     <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-                    <p className="text-sm font-medium text-foreground">Done! Your file has been downloaded.</p>
+                    <p className="text-sm font-medium text-foreground">Done! Your file is ready.</p>
                   </div>
+
+                  {downloads.length > 0 && (
+                    <div className="rounded-xl border border-border bg-card p-3 sm:p-4 space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">Your downloads</p>
+                      {downloads.map((d, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border border-border bg-secondary/30">
+                          <div className="h-9 w-9 rounded-md bg-hero-gradient flex items-center justify-center shrink-0">
+                            <FileDown className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{d.name}</p>
+                            <p className="text-xs text-muted-foreground">{formatBytes(d.size)}</p>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => redownload(d)}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Download
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {!renderResults && result}
                 </div>
               )}
