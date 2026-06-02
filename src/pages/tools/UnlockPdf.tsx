@@ -29,15 +29,9 @@ export default function UnlockPdf() {
       if (e?.name === "PasswordException") isEncrypted = true;
     }
 
-    // Not actually encrypted: just normalize and return
+    // Not actually encrypted: tell the user instead of producing a redundant file.
     if (!isEncrypted) {
-      const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-      const out = await PDFDocument.create();
-      const pages = await out.copyPages(doc, doc.getPageIndices());
-      pages.forEach((p) => out.addPage(p));
-      const data = await out.save();
-      downloadBlob(data, file.name.replace(/\.pdf$/i, "") + "-unlocked.pdf");
-      return;
+      throw new Error("This PDF is not password-protected — no need to unlock it.");
     }
 
     if (!password) throw new Error("This PDF is encrypted. Please enter the password.");
