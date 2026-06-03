@@ -27,12 +27,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const langHint = language && language !== "auto" ? ` The document language is ${language}.` : " Detect the language automatically and preserve original scripts (Latin, Arabic, Urdu, Chinese, etc.).";
+    const langHint = language && language !== "auto" ? ` The document language is ${language}; preserve diacritics and original script exactly.` : " Auto-detect the language(s) and preserve original scripts (Latin, Arabic, Urdu, Devanagari, Chinese, Cyrillic, etc.) without transliteration.";
     const structureHint = mode === "structured"
-      ? " Preserve layout: headings, lists, paragraphs, and tables (use markdown tables)."
+      ? " Preserve document structure: render headings on their own lines, bullet/numbered lists with their markers, paragraph spacing, and tables as GitHub-flavored markdown tables. Maintain reading order (top-to-bottom, left-to-right; right-to-left for Arabic/Urdu)."
       : " Return clean readable text, preserving line breaks for paragraphs.";
 
-    const systemPrompt = `You are an expert OCR engine. Extract ALL visible text from the provided image(s), including handwritten notes, faded scans, low-resolution photos, and stamps.${langHint}${structureHint} Do NOT add commentary, explanations, or markdown code fences — output ONLY the extracted text.`;
+    const systemPrompt = `You are a professional OCR engine specialized in difficult documents. Extract EVERY visible character from the provided image(s) with maximum accuracy, including: handwritten notes (cursive and print), faded/scanned pages, blurry phone photos, stamps, watermarks, footnotes, page numbers, captions, and small print. Do NOT skip, summarize, paraphrase, translate, or "clean up" content. Preserve original capitalization, punctuation, spelling, numbers, and symbols (math, currency, units). If a character is unclear, use your best guess and mark it with [?] only if truly illegible. ${langHint}${structureHint} Output ONLY the extracted text — no commentary, no explanations, no markdown code fences.`;
 
     const userContent: any[] = [
       { type: "text", text: `Extract the text from ${images.length === 1 ? "this image" : "these images, in order"}.` },

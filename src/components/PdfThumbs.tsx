@@ -15,16 +15,17 @@ export const usePdfThumbs = (file: File | undefined) => {
         const data = new Uint8Array(await file.arrayBuffer());
         const pdf = await pdfjsLib.getDocument({ data }).promise;
         const out: string[] = [];
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 0.4 });
+          const viewport = page.getViewport({ scale: 0.55 * dpr });
           const c = document.createElement("canvas");
           c.width = viewport.width; c.height = viewport.height;
           const ctx = c.getContext("2d")!;
           ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
           await page.render({ canvasContext: ctx, viewport, canvas: c } as any).promise;
-          out.push(c.toDataURL("image/jpeg", 0.7));
-        c.width = 0; c.height = 0;
+          out.push(c.toDataURL("image/jpeg", 0.85));
+          c.width = 0; c.height = 0;
           if (cancelled) return;
         }
         if (!cancelled) setThumbs(out);

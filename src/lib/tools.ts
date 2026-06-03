@@ -295,9 +295,9 @@ export const tools: Tool[] = [
   },
   {
     slug: "pdf-reader",
-    name: "PDF Reader",
-    tagline: "Preview PDFs with zoom controls",
-    description: "Open and read PDFs directly in your browser with smooth, fast rendering and zoom controls.",
+    name: "PDF Metadata Viewer",
+    tagline: "Inspect PDF properties & metadata",
+    description: "View document properties, page statistics, encryption status, permissions, and embedded metadata for any PDF.",
     icon: BookOpen,
     gradient: "from-slate-500 to-gray-700",
     accept: "application/pdf",
