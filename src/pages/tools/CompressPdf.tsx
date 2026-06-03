@@ -9,72 +9,88 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const tool = getTool("compress-pdf");
 
-type Level = "low" | "medium" | "high";
+type Mode = "lossless" | "low" | "medium" | "high";
 
-const LEVELS: Record<Level, { dpi: number; quality: number; label: string; sub: string }> = {
-  low: { dpi: 150, quality: 0.85, label: "Low compression", sub: "Best quality · slightly smaller" },
-  medium: { dpi: 110, quality: 0.7, label: "Recommended", sub: "Balanced quality and size" },
-  high: { dpi: 80, quality: 0.55, label: "High compression", sub: "Smallest file · lower quality" },
+const MODES: Record<Mode, { label: string; sub: string; dpi?: number; quality?: number }> = {
+  lossless: { label: "Lossless (recommended)", sub: "Keeps text searchable · safe for documents" },
+  low: { label: "Low (image)", sub: "Best quality · slight reduction", dpi: 150, quality: 0.85 },
+  medium: { label: "Medium (image)", sub: "Balanced quality and size", dpi: 110, quality: 0.7 },
+  high: { label: "High (image)", sub: "Smallest file · lower quality", dpi: 80, quality: 0.55 },
 };
 
 export default function CompressPdf() {
-  const [level, setLevel] = useState<Level>("medium");
+  const [mode, setMode] = useState<Mode>("lossless");
 
   const process = async (files: File[], { setProgress, setStatus }: any) => {
     const file = files[0];
     await validatePdf(file);
     const original = file.size;
-    const settings = LEVELS[level];
 
     setStatus("Reading PDF…");
     const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjsLib.getDocument({ data: data.slice() }).promise;
-    const total = pdf.numPages;
 
-    const out = await PDFDocument.create();
+    let compressed: Uint8Array;
 
-    for (let i = 1; i <= total; i++) {
-      setStatus(`Compressing page ${i} of ${total}…`);
-      const page = await pdf.getPage(i);
-      const baseViewport = page.getViewport({ scale: 1 });
-      const scale = settings.dpi / 72;
-      const viewport = page.getViewport({ scale });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.floor(viewport.width);
-      canvas.height = Math.floor(viewport.height);
-      const ctx = canvas.getContext("2d", { alpha: false })!;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
-
-      const blob: Blob = await new Promise((res, rej) =>
-        canvas.toBlob(
-          (b) => (b ? res(b) : rej(new Error(`Failed to export page ${i}. Your browser may have run out of memory.`))),
-          "image/jpeg",
-          settings.quality,
-        ),
-      );
-      const bytes = new Uint8Array(await blob.arrayBuffer());
-      const jpg = await out.embedJpg(bytes);
-      const newPage = out.addPage([baseViewport.width, baseViewport.height]);
-      newPage.drawImage(jpg, { x: 0, y: 0, width: baseViewport.width, height: baseViewport.height });
-
-      // Free memory
-      canvas.width = canvas.height = 0;
-      setProgress((i / total) * 95);
+    if (mode === "lossless") {
+      setStatus("Optimising structure…");
+      const doc = await PDFDocument.load(data, { updateMetadata: false });
+      // Strip non-essential metadata to shrink size without touching content streams.
+      try {
+        doc.setTitle("");
+        doc.setSubject("");
+        doc.setKeywords([]);
+        doc.setProducer("TurboPDF");
+        doc.setCreator("TurboPDF");
+      } catch {}
+      setProgress(60);
+      compressed = await doc.save({ useObjectStreams: true, addDefaultPage: false, objectsPerTick: 200 });
+    } else {
+      const settings = MODES[mode] as { dpi: number; quality: number };
+      const pdf = await pdfjsLib.getDocument({ data: data.slice() }).promise;
+      const total = pdf.numPages;
+      const out = await PDFDocument.create();
+      for (let i = 1; i <= total; i++) {
+        setStatus(`Compressing page ${i} of ${total}…`);
+        const page = await pdf.getPage(i);
+        const baseViewport = page.getViewport({ scale: 1 });
+        const viewport = page.getViewport({ scale: settings.dpi / 72 });
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        const ctx = canvas.getContext("2d", { alpha: false })!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+        const blob: Blob = await new Promise((res, rej) =>
+          canvas.toBlob((b) => (b ? res(b) : rej(new Error(`Failed to export page ${i}.`))), "image/jpeg", settings.quality),
+        );
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        const jpg = await out.embedJpg(bytes);
+        const newPage = out.addPage([baseViewport.width, baseViewport.height]);
+        newPage.drawImage(jpg, { x: 0, y: 0, width: baseViewport.width, height: baseViewport.height });
+        canvas.width = canvas.height = 0;
+        setProgress((i / total) * 95);
+      }
+      setStatus("Saving…");
+      compressed = await out.save({ useObjectStreams: true });
     }
 
-    setStatus("Saving…");
-    const compressed = await out.save({ useObjectStreams: true });
     const finalSize = compressed.byteLength;
     const reduction = Math.max(0, ((original - finalSize) / original) * 100);
-
     const name = file.name.replace(/\.pdf$/i, "") + "-compressed.pdf";
-    if (finalSize < original) downloadBlob(compressed, name);
 
-    if (finalSize > original) return <div className="text-destructive text-sm font-medium">Warning: Compression increased the file size. The original file may already be optimized.</div>;
+    if (finalSize < original) {
+      downloadBlob(compressed, name);
+    } else {
+      // Always offer the file even if larger, so the user still gets the output.
+      downloadBlob(compressed, name);
+      return (
+        <div className="text-sm text-muted-foreground">
+          This PDF is already optimised — the output is the same size or slightly larger. Try a higher (image) compression level if you need a smaller file.
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-3 gap-3 text-center">
         <Stat label="Original" value={formatBytes(original)} />
@@ -86,24 +102,24 @@ export default function CompressPdf() {
 
   const options = () => (
     <div>
-      <Label className="text-sm font-semibold mb-3 block">Compression level</Label>
-      <RadioGroup value={level} onValueChange={(v) => setLevel(v as Level)} className="grid sm:grid-cols-3 gap-3">
-        {(Object.keys(LEVELS) as Level[]).map((k) => (
+      <Label className="text-sm font-semibold mb-3 block">Compression mode</Label>
+      <RadioGroup value={mode} onValueChange={(v) => setMode(v as Mode)} className="grid sm:grid-cols-2 gap-3">
+        {(Object.keys(MODES) as Mode[]).map((k) => (
           <label
             key={k}
-            htmlFor={`level-${k}`}
+            htmlFor={`mode-${k}`}
             className={`relative flex flex-col gap-1 p-4 rounded-xl border cursor-pointer transition-all ${
-              level === k ? "border-primary bg-primary/5 shadow-soft" : "border-border hover:border-primary/40"
+              mode === k ? "border-primary bg-primary/5 shadow-soft" : "border-border hover:border-primary/40"
             }`}
           >
-            <RadioGroupItem id={`level-${k}`} value={k} className="sr-only" />
-            <span className="text-sm font-semibold capitalize">{k}</span>
-            <span className="text-xs text-muted-foreground">{LEVELS[k].sub}</span>
+            <RadioGroupItem id={`mode-${k}`} value={k} className="sr-only" />
+            <span className="text-sm font-semibold">{MODES[k].label}</span>
+            <span className="text-xs text-muted-foreground">{MODES[k].sub}</span>
           </label>
         ))}
       </RadioGroup>
       <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
-        ⚠️ Note: pages are rasterized to images for maximum size reduction. Text in the output PDF will not be selectable, searchable or editable. For text-preserving compression, use a desktop tool.
+        Lossless mode preserves all text, fonts and vector graphics. Image modes rasterise pages for maximum reduction — text becomes non-selectable.
       </p>
     </div>
   );
