@@ -21,7 +21,7 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Seo title="Admin Panel · TurboPDF" description="Admin panel" canonical="https://turbopdf.app/admin/panel" />
+      <Seo title="Admin Panel · TurboPDF" description="Admin panel" canonical="https://turbopdf-lab.vercel.app/admin/panel" />
       <Navbar />
       <main className="flex-1 py-10">
         <div className="container-tight">

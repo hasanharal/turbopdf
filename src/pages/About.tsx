@@ -5,7 +5,7 @@ export default function About() {
     <StaticPage
       title="About TurboPDF — Fast, Free PDF Tools"
       description="TurboPDF is a fast, reliable, browser-based PDF platform. Learn about our mission and the founder, M Hasan Ramzan."
-      canonical="https://turbopdf.app/about"
+      canonical="https://turbopdf-lab.vercel.app/about"
       eyebrow="About us"
       heading="About TurboPDF"
       intro="A fast, reliable and easy-to-use platform built to simplify your PDF tasks."

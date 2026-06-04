@@ -131,7 +131,7 @@ export default function PdfReader() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Seo title="PDF Metadata Viewer — Inspect PDF Properties | TurboPDF" description="View detailed metadata, properties, page statistics, encryption status and permissions of any PDF." canonical="https://turbopdf.app/pdf-reader" />
+      <Seo title="PDF Metadata Viewer — Inspect PDF Properties | TurboPDF" description="View detailed metadata, properties, page statistics, encryption status and permissions of any PDF." canonical="https://turbopdf-lab.vercel.app/pdf-reader" />
       <Navbar />
       <main className="flex-1">
         <section className="container-tight pt-10 pb-6">

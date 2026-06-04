@@ -29,7 +29,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Seo title="Admin · TurboPDF" description="Admin access" canonical="https://turbopdf.app/admin" />
+      <Seo title="Admin · TurboPDF" description="Admin access" canonical="https://turbopdf-lab.vercel.app/admin" />
       <Navbar />
       <main className="flex-1 flex items-center justify-center py-16">
         <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-border bg-card p-7 shadow-soft">
