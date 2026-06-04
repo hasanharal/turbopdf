@@ -5,7 +5,7 @@ export default function Terms() {
     <StaticPage
       title="Terms & Conditions — TurboPDF"
       description="Read the Terms & Conditions for using TurboPDF, the free browser-based PDF toolkit."
-      canonical="https://turbopdf.app/terms"
+      canonical="https://turbopdf-lab.vercel.app/terms"
       eyebrow="Legal"
       heading="Terms & Conditions"
       intro="By using TurboPDF, you agree to the terms outlined below."

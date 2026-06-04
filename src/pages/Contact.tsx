@@ -6,7 +6,7 @@ export default function Contact() {
     <StaticPage
       title="Contact TurboPDF — Get in Touch"
       description="Get in touch with the TurboPDF team. We'd love to hear your feedback, questions and feature requests."
-      canonical="https://turbopdf.app/contact"
+      canonical="https://turbopdf-lab.vercel.app/contact"
       eyebrow="Contact"
       heading="Let's talk"
       intro="Have a question, feedback or feature request? Reach out — we read every message."

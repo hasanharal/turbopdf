@@ -5,7 +5,7 @@ export default function Privacy() {
     <StaticPage
       title="Privacy Policy — TurboPDF"
       description="TurboPDF processes all files locally in your browser. Read our privacy policy to learn how we handle your data."
-      canonical="https://turbopdf.app/privacy"
+      canonical="https://turbopdf-lab.vercel.app/privacy"
       eyebrow="Legal"
       heading="Privacy Policy"
       intro="Your files stay on your device. We don't collect, store or share your documents."

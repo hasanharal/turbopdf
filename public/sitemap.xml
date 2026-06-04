@@ -1,187 +1,187 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://turbopdf.app/</loc>
+    <loc>https://turbopdf-lab.vercel.app/</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/compress-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/compress-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/merge-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/merge-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/split-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/split-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/pdf-to-word</loc>
+    <loc>https://turbopdf-lab.vercel.app/pdf-to-word</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/word-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/word-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/jpg-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/jpg-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/pdf-to-jpg</loc>
+    <loc>https://turbopdf-lab.vercel.app/pdf-to-jpg</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/excel-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/excel-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/powerpoint-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/powerpoint-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/scan-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/scan-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/crop-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/crop-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/extract-images</loc>
+    <loc>https://turbopdf-lab.vercel.app/extract-images</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/edit-metadata</loc>
+    <loc>https://turbopdf-lab.vercel.app/edit-metadata</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/compare-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/compare-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/repair-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/repair-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/html-to-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/html-to-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/ocr-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/ocr-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/unlock-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/unlock-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/protect-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/protect-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/watermark-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/watermark-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/rotate-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/rotate-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/page-numbers</loc>
+    <loc>https://turbopdf-lab.vercel.app/page-numbers</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/delete-pages</loc>
+    <loc>https://turbopdf-lab.vercel.app/delete-pages</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/reorder-pages</loc>
+    <loc>https://turbopdf-lab.vercel.app/reorder-pages</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/sign-pdf</loc>
+    <loc>https://turbopdf-lab.vercel.app/sign-pdf</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/pdf-reader</loc>
+    <loc>https://turbopdf-lab.vercel.app/pdf-reader</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/about</loc>
+    <loc>https://turbopdf-lab.vercel.app/about</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/privacy</loc>
+    <loc>https://turbopdf-lab.vercel.app/privacy</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/terms</loc>
+    <loc>https://turbopdf-lab.vercel.app/terms</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://turbopdf.app/contact</loc>
+    <loc>https://turbopdf-lab.vercel.app/contact</loc>
     <lastmod>2026-06-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

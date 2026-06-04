@@ -100,7 +100,7 @@ export const ToolPageLayout = ({ tool, process, options, helper, ctaLabel, hideD
       <Seo
         title={`${tool.name} | Professional Online PDF Tools | TurboPDF`}
         description={tool.description}
-        canonical={`https://turbopdf.app/${tool.slug}`}
+        canonical={`https://turbopdf-lab.vercel.app/${tool.slug}`}
       />
       <Navbar />
       <main className="flex-1">

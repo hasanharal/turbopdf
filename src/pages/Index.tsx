@@ -13,7 +13,7 @@ export default function Index() {
       <Seo
         title="TurboPDF — Fast, Free & Secure PDF Tools Online"
         description="Compress, merge, split and convert PDFs instantly in your browser. 100% free, secure browser-side processing — no upload required."
-        canonical="https://turbopdf.app/"
+        canonical="https://turbopdf-lab.vercel.app/"
       />
       <Navbar />
       <main className="flex-1">

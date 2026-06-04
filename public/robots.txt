@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/panel
 
-Sitemap: https://turbopdf.app/sitemap.xml
+Sitemap: https://turbopdf-lab.vercel.app/sitemap.xml
